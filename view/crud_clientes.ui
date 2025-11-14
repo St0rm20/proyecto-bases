@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1200</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Gestión de Clientes</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_main">
+    <item>
+     <!-- Panel Izquierdo: Lista de Clientes -->
+     <widget class="QGroupBox" name="groupBox_lista">
+      <property name="title">
+       <string>Lista de Clientes</string>
+      </property>
+      <property name="minimumWidth">
+       <number>500</number>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_lista">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_buscar">
+         <item>
+          <widget class="QLineEdit" name="lineEdit_buscar">
+           <property name="placeholderText">
+            <string>Buscar por nombre, código o email...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_buscar">
+           <property name="text">
+            <string>🔍 Buscar</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_refrescar">
+           <property name="text">
+            <string>🔄 Refrescar</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="tableWidget_clientes">
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::SingleSelection</enum>
+         </property>
+         <column>
+          <property name="text">
+           <string>Código</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Nombre</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Email</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Teléfono</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Municipio</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_botones_tabla">
+         <item>
+          <widget class="QLabel" name="label_total">
+           <property name="text">
+            <string>Total: 0 clientes</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_nuevo">
+           <property name="text">
+            <string>➕ Nuevo Cliente</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <!-- Panel Derecho: Detalles del Cliente -->
+     <widget class="QGroupBox" name="groupBox_detalles">
+      <property name="title">
+       <string>Detalles del Cliente</string>
+      </property>
+      <property name="minimumWidth">
+       <number>450</number>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_detalles">
+       <item>
+        <widget class="QScrollArea" name="scrollArea">
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QWidget" name="scrollAreaWidgetContents">
+          <layout class="QVBoxLayout" name="verticalLayout_scroll">
+           <item>
+            <widget class="QGroupBox" name="groupBox_datos_basicos">
+             <property name="title">
+              <string>Datos Básicos</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_basicos">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_codigo">
+                <property name="text">
+                 <string>Código *:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="lineEdit_codigo">
+                <property name="placeholderText">
+                 <string>Cédula del cliente</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_nombre">
+                <property name="text">
+                 <string>Nombre *:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="lineEdit_nombre">
+                <property name="placeholderText">
+                 <string>Nombre completo</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_email">
+                <property name="text">
+                 <string>Email *:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="lineEdit_email">
+                <property name="placeholderText">
+                 <string>correo@ejemplo.com</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_telefono">
+                <property name="text">
+                 <string>Teléfono:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QLineEdit" name="lineEdit_telefono">
+                <property name="placeholderText">
+                 <string>3001234567</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QLabel" name="label_rol">
+                <property name="text">
+                 <string>Tipo de Usuario:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QComboBox" name="comboBox_rol">
+                <item>
+                 <property name="text">
+                  <string>-- Sin asignar --</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Usuario Paramétrico</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Usuario Esporádico</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="groupBox_direccion">
+             <property name="title">
+              <string>Dirección</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_direccion">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_departamento">
+                <property name="text">
+                 <string>Departamento:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="lineEdit_departamento">
+                <property name="placeholderText">
+                 <string>Ej: Quindío</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_municipio">
+                <property name="text">
+                 <string>Municipio:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="lineEdit_municipio">
+                <property name="placeholderText">
+                 <string>Ej: Armenia</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_calle">
+                <property name="text">
+                 <string>Calle:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="lineEdit_calle">
+                <property name="placeholderText">
+                 <string>Ej: Calle 15</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_direccion">
+                <property name="text">
+                 <string>Dirección:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QLineEdit" name="lineEdit_direccion">
+                <property name="placeholderText">
+                 <string>Dirección completa</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="groupBox_contrasena">
+             <property name="title">
+              <string>Cambiar Contraseña</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_password">
+              <item>
+               <widget class="QCheckBox" name="checkBox_cambiar_contrasena">
+                <property name="text">
+                 <string>Cambiar contraseña del cliente</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QWidget" name="widget_password" native="true">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_password">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_nueva_contrasena">
+                   <property name="text">
+                    <string>Nueva Contraseña:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="lineEdit_nueva_contrasena">
+                   <property name="echoMode">
+                    <enum>QLineEdit::Password</enum>
+                   </property>
+                   <property name="placeholderText">
+                    <string>Mínimo 6 caracteres</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_confirmar_contrasena">
+                   <property name="text">
+                    <string>Confirmar:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLineEdit" name="lineEdit_confirmar_contrasena">
+                   <property name="echoMode">
+                    <enum>QLineEdit::Password</enum>
+                   </property>
+                   <property name="placeholderText">
+                    <string>Repita la contraseña</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_modo">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style=" font-weight:600;"&gt;Modo: Visualización&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_acciones">
+         <item>
+          <widget class="QPushButton" name="pushButton_guardar">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="minimumHeight">
+            <number>35</number>
+           </property>
+           <property name="text">
+            <string>💾 Guardar</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_editar">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="minimumHeight">
+            <number>35</number>
+           </property>
+           <property name="text">
+            <string>✏️ Editar</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_eliminar">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="minimumHeight">
+            <number>35</number>
+           </property>
+           <property name="text">
+            <string>🗑️ Eliminar</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_cancelar">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="minimumHeight">
+            <number>35</number>
+           </property>
+           <property name="text">
+            <string>❌ Cancelar</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

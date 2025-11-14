@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>500</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Registro de Nuevo Usuario</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QLabel" name="label_titulo">
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style=" font-size:14pt; font-weight:600;"&gt;Registro de Cliente&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="groupBox_datos_basicos">
+      <property name="title">
+       <string>Datos Básicos</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_basicos">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_codigo">
+         <property name="text">
+          <string>Código (Cédula) *:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="lineEdit_codigo">
+         <property name="placeholderText">
+          <string>Ej: 1234567890</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_nombre">
+         <property name="text">
+          <string>Nombre Completo *:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="lineEdit_nombre">
+         <property name="placeholderText">
+          <string>Ej: Juan Pérez García</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_telefono">
+         <property name="text">
+          <string>Teléfono:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="lineEdit_telefono">
+         <property name="placeholderText">
+          <string>Ej: 3001234567</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_email">
+         <property name="text">
+          <string>Email *:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="lineEdit_email">
+         <property name="placeholderText">
+          <string>Ej: usuario@email.com</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_rol">
+         <property name="text">
+          <string>Tipo de Usuario *:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QComboBox" name="comboBox_rol">
+         <item>
+          <property name="text">
+           <string>-- Seleccione un tipo --</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Usuario Paramétrico</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Usuario Esporádico</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="groupBox_direccion">
+      <property name="title">
+       <string>Dirección (Opcional)</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_direccion">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_departamento">
+         <property name="text">
+          <string>Departamento:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="lineEdit_departamento">
+         <property name="placeholderText">
+          <string>Ej: Quindío</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_municipio">
+         <property name="text">
+          <string>Municipio:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="lineEdit_municipio">
+         <property name="placeholderText">
+          <string>Ej: Armenia</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_calle">
+         <property name="text">
+          <string>Calle:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="lineEdit_calle">
+         <property name="placeholderText">
+          <string>Ej: Calle 15</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_direccion">
+         <property name="text">
+          <string>Dirección Completa:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="lineEdit_direccion">
+         <property name="placeholderText">
+          <string>Ej: Calle 15 # 20-30, Apto 301</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="groupBox_seguridad">
+      <property name="title">
+       <string>Seguridad</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_seguridad">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_password">
+         <property name="text">
+          <string>Contraseña *:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="lineEdit_password">
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
+         </property>
+         <property name="placeholderText">
+          <string>Mínimo 6 caracteres</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_password_confirm">
+         <property name="text">
+          <string>Confirmar Contraseña *:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="lineEdit_password_confirm">
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
+         </property>
+         <property name="placeholderText">
+          <string>Repita la contraseña</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_obligatorios">
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=" font-size:9pt; font-style:italic;"&gt;* Campos obligatorios&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton_register_submit">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>40</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Registrarse</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton_go_to_login">
+      <property name="text">
+       <string>¿Ya tienes cuenta? Iniciar Sesión</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
