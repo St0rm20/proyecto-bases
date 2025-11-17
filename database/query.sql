@@ -21,8 +21,10 @@ CREATE TABLE Cliente (
 CREATE TABLE Categoria (
     codigo_categoria INT PRIMARY KEY,
     iva DECIMAL(6,2) NOT NULL CHECK (iva >= 0),
-    utilidad DECIMAL(12,2) NOT NULL CHECK (utilidad >= 0)
+    utilidad DECIMAL(12,2) NOT NULL CHECK (utilidad >= 0),
+    nombre VARCHAR(100) NOT NULL
 );
+
 CREATE TABLE Producto (
     codigo INT PRIMARY KEY,
     descripcion VARCHAR(255),

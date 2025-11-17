@@ -16,9 +16,10 @@ class CategoriaData:
     codigo_categoria: int
     iva: Decimal
     utilidad: Decimal
+    nombre: str  # <-- AÑADIDO
 
     def __str__(self):
-        return f"Categoria(codigo={self.codigo_categoria}, IVA={self.iva}%, Utilidad=${self.utilidad})"
+        return f"Categoria(codigo={self.codigo_categoria}, nombre='{self.nombre}', IVA={self.iva}, Utilidad={self.utilidad}%)"
 
 
 class Categoria(BaseModel):
@@ -30,24 +31,26 @@ class Categoria(BaseModel):
     def get_primary_key(self):
         return "codigo_categoria"
 
-    def crear(self, codigo_categoria: int, iva: float, utilidad: float) -> bool:
+    def crear(self, codigo_categoria: int, iva: Decimal, utilidad: Decimal, nombre: str) -> bool:
         """Crea una nueva categoría"""
+        # Se añade 'nombre' a la consulta
         sql = """
-            INSERT INTO Categoria (codigo_categoria, iva, utilidad)
-            VALUES (:codigo_categoria, :iva, :utilidad)
+            INSERT INTO Categoria (codigo_categoria, iva, utilidad, nombre)
+            VALUES (:codigo_categoria, :iva, :utilidad, :nombre)
         """
         try:
             self.db.execute_query(sql, {
                 'codigo_categoria': codigo_categoria,
                 'iva': iva,
-                'utilidad': utilidad
+                'utilidad': utilidad,
+                'nombre': nombre  # <-- AÑADIDO
             }, fetch=False)
             return True
         except Exception as e:
             print(f"Error al crear categoría: {e}")
             return False
 
-    def actualizar(self, codigo_categoria: int, iva: float = None, utilidad: float = None) -> bool:
+    def actualizar(self, codigo_categoria: int, iva: Decimal = None, utilidad: Decimal = None, nombre: str = None) -> bool:
         """Actualiza una categoría existente"""
         campos = []
         params = {'codigo_categoria': codigo_categoria}
@@ -58,6 +61,9 @@ class Categoria(BaseModel):
         if utilidad is not None:
             campos.append("utilidad = :utilidad")
             params['utilidad'] = utilidad
+        if nombre is not None:  # <-- AÑADIDO
+            campos.append("nombre = :nombre")
+            params['nombre'] = nombre
 
         if not campos:
             return False
