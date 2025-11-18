@@ -22,8 +22,11 @@ from model.detalle_venta_producto import DetalleVentaProducto
 class VentasWindow(QtWidgets.QMainWindow):
     """Sistema completo de ventas con soporte para créditos"""
 
-    def __init__(self):
+    def __init__(self, parent=None):  # ✅ 1. Cambiar firma del __init__
         super().__init__()
+
+        # ✅ 2. Agregar después de super().__init__()
+        self.lobby_window = parent
 
         # Cargar UI
         try:
@@ -45,6 +48,7 @@ class VentasWindow(QtWidgets.QMainWindow):
         self.carrito = []  # Lista de dict: {producto, cantidad, precio, subtotal}
         self.cliente_seleccionado = None
         self.producto_seleccionado = None
+        self.ultima_venta_creada = None  # ✅ NUEVA VARIABLE: Guardar código de última venta
 
         # Configurar UI
         self.configurar_tabla()
@@ -55,6 +59,9 @@ class VentasWindow(QtWidgets.QMainWindow):
         self.cargar_productos()
 
         self.statusBar().showMessage("Sistema de ventas listo. Seleccione un cliente para comenzar.")
+
+        # ✅ 3. Agregar antes del último statusBar()
+        self.crear_boton_regreso()
 
     def conectar_senales(self):
         """Conecta todas las señales de la interfaz"""
@@ -544,22 +551,27 @@ class VentasWindow(QtWidgets.QMainWindow):
             if es_credito:
                 self.crear_credito(id_venta, total)
 
-            # Éxito
-            QMessageBox.information(
+            # ✅ GUARDAR EL CÓDIGO DE VENTA CREADA
+            self.ultima_venta_creada = codigo_venta
+
+            # ✅ MOSTRAR MENSAJE DE ÉXITO Y PREGUNTAR SI DESEA VER FACTURA
+            respuesta_factura = QMessageBox.question(
                 self,
-                "Venta Exitosa",
-                f"✅ Venta procesada exitosamente\n\n"
+                "✅ Venta Exitosa",
+                f"Venta procesada exitosamente\n\n"
                 f"Código: {codigo_venta}\n"
-                f"Total: ${total:,.2f}"
+                f"Total: ${total:,.2f}\n\n"
+                "¿Desea ver el detalle de la factura?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes
             )
 
-            # Limpiar
-            self.carrito = []
-            self.actualizar_tabla_carrito()
-            self.calcular_resumen()
-            self.comboBox_cliente.setCurrentIndex(0)
-            self.comboBox_producto.setCurrentIndex(0)
-            self.radioButton_contado.setChecked(True)
+            if respuesta_factura == QMessageBox.Yes:
+                # ✅ ABRIR VENTANA DE DETALLE DE FACTURA
+                self.abrir_detalle_factura(codigo_venta)
+            else:
+                # Limpiar formulario si no quiere ver la factura
+                self.limpiar_despues_venta()
 
             # Recargar productos (para actualizar stock)
             self.cargar_productos()
@@ -568,6 +580,42 @@ class VentasWindow(QtWidgets.QMainWindow):
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Error al procesar venta:\n{e}")
+
+    def abrir_detalle_factura(self, codigo_venta: str):
+        """Abre la ventana de detalle de factura con el código de venta especificado"""
+        try:
+            from view.detalle_venta import VentanaDetalleFactura
+            self.ventana_detalle = VentanaDetalleFactura(codigo_venta, parent=self.lobby_window)
+            self.ventana_detalle.show()
+
+            # Limpiar formulario después de abrir la factura
+            self.limpiar_despues_venta()
+
+        except ImportError as e:
+            QMessageBox.warning(
+                self,
+                "Módulo no disponible",
+                f"No se pudo abrir el detalle de factura:\n{e}"
+            )
+            # Limpiar formulario aunque falle la apertura
+            self.limpiar_despues_venta()
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Error",
+                f"Error al abrir detalle de factura:\n{e}"
+            )
+            # Limpiar formulario aunque falle la apertura
+            self.limpiar_despues_venta()
+
+    def limpiar_despues_venta(self):
+        """Limpia el formulario después de una venta exitosa"""
+        self.carrito = []
+        self.actualizar_tabla_carrito()
+        self.calcular_resumen()
+        self.comboBox_cliente.setCurrentIndex(0)
+        self.comboBox_producto.setCurrentIndex(0)
+        self.radioButton_contado.setChecked(True)
 
     def crear_credito(self, id_venta: int, total: float):
         """Crea el registro de crédito"""
@@ -592,6 +640,33 @@ class VentasWindow(QtWidgets.QMainWindow):
             plazo_meses=plazo_meses,
             id_venta=id_venta
         )
+
+    # ✅ 5. Agregar los 3 métodos al final de la clase
+    def actualizar_vista(self):
+        """Actualiza la vista recargando clientes y productos"""
+        self.cargar_clientes()
+        self.cargar_productos()
+        self.statusBar().showMessage("Datos actualizados correctamente")
+
+    def crear_boton_regreso(self):
+        from PyQt5.QtWidgets import QPushButton
+        btn = QPushButton("← Regresar al Menú")
+        btn.setStyleSheet("""
+            QPushButton {
+                background-color: #6C757D; color: white; border: none;
+                border-radius: 5px; padding: 10px 20px; font-size: 14px; font-weight: bold;
+            }
+            QPushButton:hover { background-color: #5A6268; }
+        """)
+        btn.clicked.connect(self.regresar_al_lobby)
+        self.statusBar().addPermanentWidget(btn)
+
+    def regresar_al_lobby(self):
+        if self.lobby_window:
+            self.lobby_window.show()
+            self.lobby_window.raise_()
+            self.lobby_window.activateWindow()
+        self.close()
 
 
 if __name__ == "__main__":

@@ -698,7 +698,6 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
 
 
 if __name__ == "__main__":
-    sesion.set_usuario_id(1001)
     app = QtWidgets.QApplication(sys.argv)
     window = CRUDProductosWindow()
     window.show()

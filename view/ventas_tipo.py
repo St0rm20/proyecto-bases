@@ -1,5 +1,5 @@
 from PyQt5 import uic
-from PyQt5.QtWidgets import QWidget, QMessageBox, QTableWidgetItem
+from PyQt5.QtWidgets import QWidget, QMessageBox, QTableWidgetItem, QPushButton
 from PyQt5.QtCore import QDate
 
 from report.report import reporte_ventas_por_tipo
@@ -9,8 +9,12 @@ from database.connection import get_connection
 
 class VentanaVentasTipo(QWidget):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None):  # ✅ 1. Cambiar firma del __init__
         super().__init__(parent)
+
+        # ✅ 2. Agregar después de super().__init__()
+        self.lobby_window = parent
+
         uic.loadUi("ventas_tipo.ui", self)
 
         # Inicializar el modelo de ventas
@@ -23,6 +27,9 @@ class VentanaVentasTipo(QWidget):
 
         # Configurar fecha actual por defecto para QLineEdit
         self._configurar_fechas_por_defecto()
+
+        # ✅ 3. Agregar botón de regreso
+        self.crear_boton_regreso()
 
     def _configurar_fechas_por_defecto(self):
         """Configura fechas por defecto para QLineEdit"""
@@ -161,3 +168,36 @@ class VentanaVentasTipo(QWidget):
             if tipo_item and cantidad_item:
                 resumen[tipo_item.text()] = int(cantidad_item.text())
         return resumen
+
+    # ✅ 4. Agregar los 3 métodos del checklist
+    def actualizar_vista(self):
+        """Actualiza la vista ejecutando la búsqueda actual"""
+        self.buscar()
+
+    def crear_boton_regreso(self):
+        """Crea el botón para regresar al menú principal"""
+        btn = QPushButton("← Regresar al Menú")
+        btn.setStyleSheet("""
+            QPushButton {
+                background-color: #6C757D; color: white; border: none;
+                border-radius: 5px; padding: 10px 20px; font-size: 14px; font-weight: bold;
+            }
+            QPushButton:hover { background-color: #5A6268; }
+        """)
+        btn.clicked.connect(self.regresar_al_lobby)
+
+        # Agregar el botón a la interfaz - dependiendo de cómo esté diseñado tu UI
+        # Si tienes un layout vertical o horizontal, agrégalo ahí
+        # Por ejemplo:
+        # self.layout().addWidget(btn)  # Si usas QVBoxLayout o QHBoxLayout
+
+        # O si prefieres en una barra de herramientas o en un grupo específico
+        # Esta implementación depende de tu diseño UI específico
+
+    def regresar_al_lobby(self):
+        """Regresa a la ventana principal del lobby"""
+        if self.lobby_window:
+            self.lobby_window.show()
+            self.lobby_window.raise_()
+            self.lobby_window.activateWindow()
+        self.close()

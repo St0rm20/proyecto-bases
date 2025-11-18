@@ -7,18 +7,20 @@ Licencia: GPLv3
 
 import sys
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem
+from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem, QPushButton
 from PyQt5.QtCore import Qt
 from model.cliente import Cliente, ClienteData
 
 
-class CRUDClientesWindow(QtWidgets.QMainWindow):
+class CrudClientesWindow(QtWidgets.QMainWindow):
     """
     Ventana CRUD completa para gestionar clientes
     """
 
-    def __init__(self):
+    def __init__(self, parent=None):  # ← CAMBIO 1: Agregar parent
         super().__init__()
+
+        self.lobby_window = parent  # ← CAMBIO 2: Guardar referencia al lobby
 
         # Cargar el archivo .ui
         try:
@@ -36,7 +38,7 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
             sys.exit(1)
 
         # Variables de estado
-        self.modo_actual = "visualizacion"  # visualizacion, edicion, nuevo
+        self.modo_actual = "visualizacion"
         self.cliente_seleccionado = None
 
         # Conectar señales
@@ -50,13 +52,17 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
 
         # Inicializar estado
         self.limpiar_formulario()
+
+        # ← CAMBIO 3: Crear botón de regreso
+        self.crear_boton_regreso()
+
         self.statusBar().showMessage("Listo. Seleccione un cliente o cree uno nuevo.")
 
     def conectar_senales(self):
         """Conecta todos los eventos de la interfaz"""
         # Botones de búsqueda y lista
         self.pushButton_buscar.clicked.connect(self.buscar_clientes)
-        self.pushButton_refrescar.clicked.connect(self.cargar_todos_clientes)
+        self.pushButton_refrescar.clicked.connect(self.actualizar_vista)  # ← CAMBIO 4
         self.pushButton_nuevo.clicked.connect(self.modo_nuevo_cliente)
         self.lineEdit_buscar.returnPressed.connect(self.buscar_clientes)
 
@@ -71,13 +77,11 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
 
     def configurar_tabla(self):
         """Configura las propiedades de la tabla"""
-        self.tableWidget_clientes.setColumnWidth(0, 100)  # Código
-        self.tableWidget_clientes.setColumnWidth(1, 200)  # Nombre
-        self.tableWidget_clientes.setColumnWidth(2, 120)  # Teléfono
-        self.tableWidget_clientes.setColumnWidth(3, 150)  # Departamento
-        self.tableWidget_clientes.setColumnWidth(4, 150)  # Municipio
-
-        # Ordenar por código al hacer clic en el header
+        self.tableWidget_clientes.setColumnWidth(0, 100)
+        self.tableWidget_clientes.setColumnWidth(1, 200)
+        self.tableWidget_clientes.setColumnWidth(2, 120)
+        self.tableWidget_clientes.setColumnWidth(3, 150)
+        self.tableWidget_clientes.setColumnWidth(4, 150)
         self.tableWidget_clientes.setSortingEnabled(True)
 
     def cargar_todos_clientes(self):
@@ -99,15 +103,12 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
             return
 
         try:
-            # Intentar buscar por código (si es número)
             if texto_busqueda.isdigit():
                 cliente = self.cliente_controller.obtener_por_id(int(texto_busqueda))
                 clientes = [cliente] if cliente else []
-                # Convertir tupla a ClienteData si es necesario
                 if clientes and not isinstance(clientes[0], ClienteData):
                     clientes = [ClienteData(*clientes[0])]
             else:
-                # Buscar por nombre
                 clientes = self.cliente_controller.buscar_por_nombre(texto_busqueda)
 
             self.llenar_tabla(clientes)
@@ -119,27 +120,23 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
 
     def llenar_tabla(self, clientes):
         """Llena la tabla con los clientes proporcionados"""
-        self.tableWidget_clientes.setRowCount(0)  # Limpiar tabla
+        self.tableWidget_clientes.setRowCount(0)
 
         for cliente in clientes:
-            # Si es tupla, convertir a ClienteData
             if isinstance(cliente, tuple):
                 cliente = ClienteData(*cliente)
 
             fila = self.tableWidget_clientes.rowCount()
             self.tableWidget_clientes.insertRow(fila)
 
-            # Agregar datos a las columnas
             self.tableWidget_clientes.setItem(fila, 0, QTableWidgetItem(str(cliente.codigo_cliente)))
             self.tableWidget_clientes.setItem(fila, 1, QTableWidgetItem(cliente.nombre))
             self.tableWidget_clientes.setItem(fila, 2, QTableWidgetItem(cliente.telefono or ""))
             self.tableWidget_clientes.setItem(fila, 3, QTableWidgetItem(cliente.departamento or ""))
             self.tableWidget_clientes.setItem(fila, 4, QTableWidgetItem(cliente.municipio or ""))
 
-            # Guardar el objeto completo en la primera celda
             self.tableWidget_clientes.item(fila, 0).setData(Qt.UserRole, cliente)
 
-        # Actualizar contador
         self.label_total.setText(f"Total: {len(clientes)} clientes")
 
     def cliente_seleccionado_cambio(self):
@@ -149,12 +146,10 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
         if not seleccion:
             return
 
-        # Obtener el cliente de la primera celda de la fila seleccionada
         fila = self.tableWidget_clientes.currentRow()
         item = self.tableWidget_clientes.item(fila, 0)
         self.cliente_seleccionado = item.data(Qt.UserRole)
 
-        # Mostrar detalles
         self.mostrar_detalles_cliente(self.cliente_seleccionado)
         self.cambiar_modo("visualizacion")
 
@@ -184,8 +179,7 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
         self.modo_actual = modo
 
         if modo == "visualizacion":
-            self.label_modo.setText(
-                '<html><body><p align="center"><span style="font-weight:600;">Modo: Visualización</span></p></body></html>')
+            self.label_modo.setText('<html><body><p align="center"><span style="font-weight:600;">Modo: Visualización</span></p></body></html>')
             self.habilitar_formulario(False)
             self.pushButton_editar.setEnabled(True)
             self.pushButton_eliminar.setEnabled(True)
@@ -194,18 +188,16 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
             self.lineEdit_codigo.setEnabled(False)
 
         elif modo == "edicion":
-            self.label_modo.setText(
-                '<html><body><p align="center"><span style="font-weight:600; color:#FF8C00;">Modo: Editando</span></p></body></html>')
+            self.label_modo.setText('<html><body><p align="center"><span style="font-weight:600; color:#FF8C00;">Modo: Editando</span></p></body></html>')
             self.habilitar_formulario(True)
             self.pushButton_editar.setEnabled(False)
             self.pushButton_eliminar.setEnabled(False)
             self.pushButton_guardar.setEnabled(True)
             self.pushButton_cancelar.setEnabled(True)
-            self.lineEdit_codigo.setEnabled(False)  # No se puede cambiar el código
+            self.lineEdit_codigo.setEnabled(False)
 
         elif modo == "nuevo":
-            self.label_modo.setText(
-                '<html><body><p align="center"><span style="font-weight:600; color:#28A745;">Modo: Nuevo Cliente</span></p></body></html>')
+            self.label_modo.setText('<html><body><p align="center"><span style="font-weight:600; color:#28A745;">Modo: Nuevo Cliente</span></p></body></html>')
             self.habilitar_formulario(True)
             self.pushButton_editar.setEnabled(False)
             self.pushButton_eliminar.setEnabled(False)
@@ -273,50 +265,36 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
 
         try:
             if self.modo_actual == "nuevo":
-                # Crear nuevo cliente
                 exito = self.cliente_controller.crear(
-                    codigo_cliente=codigo,
-                    nombre=nombre,
-                    telefono=telefono,
-                    departamento=departamento,
-                    municipio=municipio,
-                    calle=calle,
-                    direccion=direccion
+                    codigo_cliente=codigo, nombre=nombre, telefono=telefono,
+                    departamento=departamento, municipio=municipio,
+                    calle=calle, direccion=direccion
                 )
 
                 if exito:
                     QMessageBox.information(self, "Éxito", "Cliente creado exitosamente.")
-                    self.cargar_todos_clientes()
+                    self.actualizar_vista()  # ← CAMBIO 5
                     self.limpiar_formulario()
                     self.cambiar_modo("visualizacion")
-                    self.statusBar().showMessage("Cliente creado exitosamente.")
                 else:
-                    QMessageBox.warning(self, "Error",
-                                        "No se pudo crear el cliente. Verifique que el código no esté duplicado.")
+                    QMessageBox.warning(self, "Error", "No se pudo crear el cliente.")
 
             elif self.modo_actual == "edicion":
-                # Actualizar cliente existente
                 exito = self.cliente_controller.actualizar(
-                    codigo_cliente=codigo,
-                    nombre=nombre,
-                    telefono=telefono,
-                    departamento=departamento,
-                    municipio=municipio,
-                    calle=calle,
-                    direccion=direccion
+                    codigo_cliente=codigo, nombre=nombre, telefono=telefono,
+                    departamento=departamento, municipio=municipio,
+                    calle=calle, direccion=direccion
                 )
 
                 if exito:
                     QMessageBox.information(self, "Éxito", "Cliente actualizado exitosamente.")
-                    self.cargar_todos_clientes()
+                    self.actualizar_vista()  # ← CAMBIO 6
                     self.cambiar_modo("visualizacion")
-                    self.statusBar().showMessage("Cliente actualizado exitosamente.")
                 else:
                     QMessageBox.warning(self, "Error", "No se pudo actualizar el cliente.")
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Error al guardar:\n{e}")
-            self.statusBar().showMessage("Error al guardar cliente.")
 
     def eliminar_cliente(self):
         """Elimina el cliente seleccionado"""
@@ -324,14 +302,11 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
             QMessageBox.warning(self, "Advertencia", "Debe seleccionar un cliente primero.")
             return
 
-        # Confirmar eliminación
         respuesta = QMessageBox.question(
-            self,
-            "Confirmar Eliminación",
+            self, "Confirmar Eliminación",
             f"¿Está seguro de eliminar al cliente '{self.cliente_seleccionado.nombre}'?\n\n"
             "Esta acción no se puede deshacer.",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No
         )
 
         if respuesta == QMessageBox.Yes:
@@ -340,16 +315,14 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
 
                 if exito:
                     QMessageBox.information(self, "Éxito", "Cliente eliminado exitosamente.")
-                    self.cargar_todos_clientes()
+                    self.actualizar_vista()  # ← CAMBIO 7
                     self.limpiar_formulario()
                     self.cambiar_modo("visualizacion")
-                    self.statusBar().showMessage("Cliente eliminado exitosamente.")
                 else:
                     QMessageBox.warning(self, "Error", "No se pudo eliminar el cliente.")
 
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Error al eliminar:\n{e}")
-                self.statusBar().showMessage("Error al eliminar cliente.")
 
     def cancelar_operacion(self):
         """Cancela la operación actual"""
@@ -363,10 +336,46 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
 
         self.statusBar().showMessage("Operación cancelada.")
 
+    # ========================================
+    # ← CAMBIOS 8, 9, 10: NUEVOS MÉTODOS
+    # ========================================
 
-# Para pruebas independientes
+    def actualizar_vista(self):
+        """Actualiza los datos de la vista"""
+        self.cargar_todos_clientes()
+        self.statusBar().showMessage("Vista actualizada")
+
+    def crear_boton_regreso(self):
+        """Crea el botón de regreso al lobby"""
+        btn_regresar = QPushButton("← Regresar al Menú")
+        btn_regresar.setStyleSheet("""
+            QPushButton {
+                background-color: #6C757D;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px 20px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #5A6268;
+            }
+        """)
+        btn_regresar.clicked.connect(self.regresar_al_lobby)
+        self.statusBar().addPermanentWidget(btn_regresar)
+
+    def regresar_al_lobby(self):
+        """Regresa a la ventana del lobby"""
+        if self.lobby_window:
+            self.lobby_window.show()
+            self.lobby_window.raise_()
+            self.lobby_window.activateWindow()
+        self.close()
+
+
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    window = CRUDClientesWindow()
+    window = CrudClientesWindow()
     window.show()
     sys.exit(app.exec_())

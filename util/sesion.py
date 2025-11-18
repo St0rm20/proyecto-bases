@@ -10,7 +10,7 @@ Licencia: GPLv3
 Lit es un singleton que almacena el ID del usuario logueado
 No modificar 
 """
-
+from model import auditoria
 _usuario_id = None
 
 
@@ -43,6 +43,7 @@ def set_usuario_id(id_usuario: int):
     if isinstance(id_usuario, int):
         _usuario_id = id_usuario
         print(f"ID de usuario guardado: {_usuario_id}")
+        auditoria.Auditoria().registrar_ingreso(id_usuario)
     else:
         print("Error: El ID debe ser un número entero.")
 
@@ -53,8 +54,10 @@ def get_usuario_id() -> int | None:
 def logout():
     """Limpia el ID de usuario."""
     global _usuario_id
+    auditoria.Auditoria().registrar_salida(_usuario_id)
     print(f"Cerrando sesión del ID: {_usuario_id}")
     _usuario_id = None
+
 
 def is_logged_in() -> bool:
     """Verifica si hay un ID guardado."""

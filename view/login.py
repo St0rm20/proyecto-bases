@@ -4,6 +4,8 @@ from PyQt5.QtWidgets import QMessageBox
 from model.usuario import Usuario
 from view.register import RegisterWindow
 from util import sesion
+from view.lobby import LobbyWindow
+
 from model import auditoria
 
 
@@ -70,7 +72,6 @@ class LoginWindow(QtWidgets.QMainWindow):
 
 
                 sesion.set_usuario_id(usuario_data.id_usuario)
-                auditoria.Auditoria().registrar_ingreso(usuario_data.id_usuario)
 
                 print("hasta aqui corre")
                 nombre_saludo = sesion.get_usuario_nombre(usuario_data.id_usuario)
@@ -104,11 +105,9 @@ class LoginWindow(QtWidgets.QMainWindow):
         # Limpiar los campos después del éxito
         self.lineEdit_username.clear()
         self.lineEdit_password.clear()
+        self.close()
+        LobbyWindow.abrir_lobby()
 
-        # Opcional: Aquí podrías abrir la ventana principal de la app y cerrar esta
-        # self.main_app_window = MainApplicationWindow()
-        # self.main_app_window.show()
-        # self.close()
 
     def login_failure(self):
         """Maneja el error de autenticación."""
@@ -147,106 +146,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
 
-    MY_STYLE_SHEET = """
-    QMainWindow {
-        background-color: #2D2D2D; /* Fondo principal oscuro */
-    }
 
-    QLabel {
-        color: #E0E0E0; /* Texto de etiquetas claro */
-        font-size: 14px;
-    }
-
-    QLineEdit {
-        background-color: #444444; /* Fondo del campo de texto */
-        color: #FFFFFF; /* Texto del campo de texto */
-        border: 1px solid #555555;
-        border-radius: 5px; /* Bordes redondeados */
-        padding: 8px; /* Relleno interno */
-        font-size: 14px;
-    }
-
-    QLineEdit:focus {
-        /* Estilo cuando el campo está seleccionado (en foco) */
-        border: 1px solid #0078D7; /* Borde azul brillante */
-        background-color: #4A4A4A;
-    }
-
-    /* --- Botón Principal (Login) --- */
-    QPushButton#pushButton_login {
-        background-color: #0078D7; /* Azul "Microsoft" */
-        color: white;
-        font-weight: bold;
-        font-size: 15px;
-        border: none;
-        border-radius: 5px;
-        padding: 10px;
-    }
-
-    QPushButton#pushButton_login:hover {
-        background-color: #005A9E; /* Tono más oscuro al pasar el ratón */
-    }
-
-    QPushButton#pushButton_login:pressed {
-        background-color: #004C8A; /* Tono al hacer clic */
-    }
-
-    /* --- Botón Secundario (Registrarse) --- */
-    QPushButton#pushButton_register {
-        background-color: transparent; /* Sin fondo */
-        color: #0078D7; /* Mismo azul que el botón de login */
-        border: none; /* Sin borde */
-        font-size: 13px;
-        padding: 5px;
-        text-decoration: underline; /* Subrayado como un link */
-    }
-
-    QPushButton#pushButton_register:hover {
-        color: #005A9E;
-    }
-
-    QPushButton#pushButton_register:pressed {
-        color: #004C8A;
-    }
-
-    /* Estilo para la barra de estado */
-    QStatusBar {
-        color: #E0E0E0;
-    }
-
-    /* Estilo para los botones de la ventana de registro */
-    QPushButton#pushButton_register_submit {
-        background-color: #0078D7;
-        color: white;
-        font-weight: bold;
-        font-size: 15px;
-        border: none;
-        border-radius: 5px;
-        padding: 10px;
-    }
-    QPushButton#pushButton_register_submit:hover {
-        background-color: #005A9E;
-    }
-    QPushButton#pushButton_register_submit:pressed {
-        background-color: #004C8A;
-    }
-
-    QPushButton#pushButton_go_to_login {
-        background-color: transparent;
-        color: #0078D7;
-        border: none;
-        font-size: 13px;
-        padding: 5px;
-        text-decoration: underline;
-    }
-    QPushButton#pushButton_go_to_login:hover {
-        color: #005A9E;
-    }
-    QPushButton#pushButton_go_to_login:pressed {
-        color: #004C8A;
-    }
-    """
-    app.setStyleSheet(MY_STYLE_SHEET)
     window = LoginWindow()
     window.show()
     sys.exit(app.exec_())

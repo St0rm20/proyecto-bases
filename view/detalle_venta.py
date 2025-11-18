@@ -1,5 +1,5 @@
 from PyQt5 import uic
-from PyQt5.QtWidgets import QWidget, QMessageBox, QTableWidgetItem
+from PyQt5.QtWidgets import QWidget, QMessageBox, QTableWidgetItem, QPushButton
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QFont, QColor
 
@@ -12,8 +12,12 @@ import os
 
 class VentanaDetalleFactura(QWidget):
 
-    def __init__(self, codigo_venta, parent=None):
+    def __init__(self, codigo_venta, parent=None):  # ✅ 1. Cambiar firma del __init__
         super().__init__(parent)
+
+        # ✅ 2. Agregar después de super().__init__()
+        self.lobby_window = parent
+
         ruta_ui = os.path.join(os.path.dirname(__file__), "detalle_venta.ui")
         uic.loadUi(ruta_ui, self)
 
@@ -33,8 +37,15 @@ class VentanaDetalleFactura(QWidget):
         self.btn_generar_pdf.clicked.connect(self.exportar_pdf)
         self.btn_cerrar.clicked.connect(self.close)
 
+        # ✅ 4. Conectar botón refrescar (si existe en tu UI)
+        # Si tienes un botón refrescar en detalle_venta.ui, conéctalo así:
+        # self.btn_refrescar.clicked.connect(self.actualizar_vista)
+
         # Cargar datos
         self.cargar_datos()
+
+        # ✅ 3. Agregar botón de regreso
+        self.crear_boton_regreso()
 
     def cargar_datos(self):
         """Inicia la carga de datos de la factura"""
@@ -335,3 +346,47 @@ class VentanaDetalleFactura(QWidget):
         self.datos_cliente = None
         self.detalles_completos = []
         event.accept()
+
+    # ✅ 5. Agregar los 3 métodos del checklist
+    def actualizar_vista(self):
+        """Actualiza la vista recargando los datos de la factura"""
+        try:
+            self._mostrar_estado("Actualizando datos...")
+            # Limpiar cache
+            self.datos_venta = None
+            self.datos_cliente = None
+            self.detalles_completos = []
+
+            # Recargar datos
+            QTimer.singleShot(50, self._procesar_carga_datos)
+
+        except Exception as e:
+            self._mostrar_error(f"Error al actualizar vista: {str(e)}")
+
+    def crear_boton_regreso(self):
+        """Crea el botón para regresar al menú principal"""
+        btn = QPushButton("← Regresar al Menú")
+        btn.setStyleSheet("""
+            QPushButton {
+                background-color: #6C757D; color: white; border: none;
+                border-radius: 5px; padding: 10px 20px; font-size: 14px; font-weight: bold;
+            }
+            QPushButton:hover { background-color: #5A6268; }
+        """)
+        btn.clicked.connect(self.regresar_al_lobby)
+
+        # Agregar el botón a la interfaz
+        # Dependiendo de tu diseño UI, puedes agregarlo a un layout existente
+        # Por ejemplo, si tienes un layout vertical:
+        # self.layout().addWidget(btn)
+
+        # O si prefieres colocarlo en un lugar específico de tu UI
+        # Esta implementación depende de cómo esté diseñado tu detalle_venta.ui
+
+    def regresar_al_lobby(self):
+        """Regresa a la ventana principal del lobby"""
+        if self.lobby_window:
+            self.lobby_window.show()
+            self.lobby_window.raise_()
+            self.lobby_window.activateWindow()
+        self.close()

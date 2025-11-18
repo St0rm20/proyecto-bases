@@ -7,7 +7,7 @@ Licencia: GPLv3
 
 import sys
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QPushButton
 from datetime import date, datetime
 from typing import Union
 from model.credito import Credito
@@ -59,8 +59,11 @@ class PagoCuotasWindow(QtWidgets.QMainWindow):
     Ventana para realizar pagos de cuotas de créditos activos
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):  # ✅ 1. Cambiar firma del __init__
+        super().__init__(parent)
+
+        # ✅ 2. Agregar después de super().__init__()
+        self.lobby_window = parent
 
         # Cargar el archivo .ui
         try:
@@ -98,10 +101,13 @@ class PagoCuotasWindow(QtWidgets.QMainWindow):
         self.limpiar_interfaz()
         self.statusBar().showMessage("Seleccione un crédito para gestionar pagos.")
 
+        # ✅ 3. Agregar botón de regreso
+        self.crear_boton_regreso()
+
     def conectar_senales(self):
         """Conecta todos los eventos de la interfaz"""
         self.comboBox_creditos.currentIndexChanged.connect(self.credito_seleccionado_cambio)
-        self.pushButton_cargar.clicked.connect(self.cargar_creditos_activos)
+        self.pushButton_cargar.clicked.connect(self.actualizar_vista)  # ✅ 4. Cambiar a actualizar_vista
         self.pushButton_realizar_pago.clicked.connect(self.realizar_pago)
 
     def verificar_sesion(self):
@@ -445,6 +451,32 @@ class PagoCuotasWindow(QtWidgets.QMainWindow):
             print(f"Error al generar código de pago: {e}")
             # En caso de error, usar timestamp como fallback
             return int(datetime.now().timestamp())
+
+    # ✅ 5. Agregar los 3 métodos del checklist
+    def actualizar_vista(self):
+        """Actualiza la vista recargando los créditos activos"""
+        self.cargar_creditos_activos()
+        self.statusBar().showMessage("Vista actualizada correctamente")
+
+    def crear_boton_regreso(self):
+        from PyQt5.QtWidgets import QPushButton
+        btn = QPushButton("← Regresar al Menú")
+        btn.setStyleSheet("""
+            QPushButton {
+                background-color: #6C757D; color: white; border: none;
+                border-radius: 5px; padding: 10px 20px; font-size: 14px; font-weight: bold;
+            }
+            QPushButton:hover { background-color: #5A6268; }
+        """)
+        btn.clicked.connect(self.regresar_al_lobby)
+        self.statusBar().addPermanentWidget(btn)
+
+    def regresar_al_lobby(self):
+        if self.lobby_window:
+            self.lobby_window.show()
+            self.lobby_window.raise_()
+            self.lobby_window.activateWindow()
+        self.close()
 
 
 if __name__ == "__main__":

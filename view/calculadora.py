@@ -1,5 +1,6 @@
 import sys
 from PyQt5 import QtWidgets, uic, QtCore
+from PyQt5.QtWidgets import QPushButton
 
 # ------------------
 # 3. LA HOJA DE ESTILOS (QSS)
@@ -104,8 +105,11 @@ QStatusBar {
 class CalculatorWindow(QtWidgets.QMainWindow):
     """Clase principal para la Calculadora."""
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):  # ✅ 1. Cambiar firma del __init__
+        super().__init__(parent)
+
+        # ✅ 2. Agregar después de super().__init__()
+        self.lobby_window = parent
 
         # Cargar el archivo .ui
         try:
@@ -150,6 +154,9 @@ class CalculatorWindow(QtWidgets.QMainWindow):
         # 3. Inicializar la barra de estado
         self.statusBar().showMessage("Lista")
 
+        # ✅ 3. Agregar botón de regreso
+        self.crear_boton_regreso()
+
     def append_to_display(self, text):
         """Añade texto al display."""
         current_text = self.display.text()
@@ -187,6 +194,31 @@ class CalculatorWindow(QtWidgets.QMainWindow):
             # Capturar errores (ej. División por cero, sintaxis mala)
             self.display.setText("Error")
             self.statusBar().showMessage(f"Error: {e}")
+
+    # ✅ 5. Agregar los 3 métodos del checklist
+    def actualizar_vista(self):
+        """Actualiza la vista limpiando la calculadora"""
+        self.clear_display()
+        self.statusBar().showMessage("Calculadora actualizada")
+
+    def crear_boton_regreso(self):
+        btn = QPushButton("← Regresar al Menú")
+        btn.setStyleSheet("""
+            QPushButton {
+                background-color: #6C757D; color: white; border: none;
+                border-radius: 5px; padding: 10px 20px; font-size: 14px; font-weight: bold;
+            }
+            QPushButton:hover { background-color: #5A6268; }
+        """)
+        btn.clicked.connect(self.regresar_al_lobby)
+        self.statusBar().addPermanentWidget(btn)
+
+    def regresar_al_lobby(self):
+        if self.lobby_window:
+            self.lobby_window.show()
+            self.lobby_window.raise_()
+            self.lobby_window.activateWindow()
+        self.close()
 
 
 # ------------------
