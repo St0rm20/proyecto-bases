@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>VentanaInventario</class>
+ <widget class="QWidget" name="VentanaInventario">
+  <property name="windowTitle">
+   <string>Inventario por Categoría</string>
+  </property>
+
+  <layout class="QVBoxLayout" name="verticalLayout">
+
+   <!-- Título -->
+   <item>
+    <widget class="QLabel" name="lbl_titulo">
+     <property name="text">
+      <string>Inventario de Productos por Categoría</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="styleSheet">
+      <string>font-size:18px; font-weight:bold;</string>
+     </property>
+    </widget>
+   </item>
+
+   <!-- Filtro -->
+   <item>
+    <layout class="QHBoxLayout" name="filtroLayout">
+
+     <item>
+      <widget class="QLabel" name="lbl_categoria">
+       <property name="text">
+        <string>Filtrar Categoría:</string>
+       </property>
+      </widget>
+     </item>
+
+     <item>
+      <widget class="QComboBox" name="combo_categoria"/>
+     </item>
+
+     <item>
+      <widget class="QPushButton" name="btn_filtrar">
+       <property name="text">
+        <string>Aplicar Filtro</string>
+       </property>
+      </widget>
+     </item>
+
+    </layout>
+   </item>
+
+   <!-- Tabla -->
+   <item>
+    <widget class="QTableWidget" name="tabla_inv"/>
+   </item>
+
+   <!-- Botones -->
+   <item>
+    <layout class="QHBoxLayout" name="botonesLayout">
+
+     <item>
+      <widget class="QPushButton" name="btn_pdf">
+       <property name="text">
+        <string>Generar PDF</string>
+       </property>
+      </widget>
+     </item>
+
+     <item>
+      <widget class="QPushButton" name="btn_cerrar">
+       <property name="text">
+        <string>Cerrar</string>
+       </property>
+      </widget>
+     </item>
+
+    </layout>
+   </item>
+
+  </layout>
+ </widget>
+</ui>

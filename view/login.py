@@ -1,10 +1,10 @@
 import sys
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QMessageBox
-# Importamos la clase Cliente que maneja la lógica de BD
-from model.cliente import Cliente
-# Importamos la nueva ventana de registro
+from model.usuario import Usuario
 from view.register import RegisterWindow
+from util import sesion
+from model import auditoria
 
 
 # ------------------
@@ -22,9 +22,9 @@ class LoginWindow(QtWidgets.QMainWindow):
             print("Error: Asegúrate de que el archivo 'login_window.ui' esté en el mismo directorio.")
             sys.exit(1)
 
-        # 1. Instanciar el controlador de Cliente
+        # 1. Instanciar el controlador de Usuario (cambio aquí)
         try:
-            self.cliente_controller = Cliente()
+            self.usuario_controller = Usuario()
         except Exception as e:
             # Manejo de error si la BD no se puede conectar
             print(f"Error fatal al conectar con la BD: {e}")
@@ -36,7 +36,6 @@ class LoginWindow(QtWidgets.QMainWindow):
         # 2. Conectar los botones
         self.pushButton_login.clicked.connect(self.handle_login)
 
-        # --- LÍNEA AÑADIDA ---
         # Esta es la conexión que faltaba para el botón de registro
         self.pushButton_register.clicked.connect(self.show_register_window)
         # ---------------------
@@ -60,17 +59,22 @@ class LoginWindow(QtWidgets.QMainWindow):
             QMessageBox.warning(self, "Campos Vacíos", "Por favor, ingrese su email y contraseña.")
             return
 
-        # 3. Autenticar usando el controlador
+        # 3. Autenticar usando el controlador de Usuario (cambio aquí)
         try:
-            if self.cliente_controller.verificar_contrasena(email, password):
-                # ¡Éxito! Ahora obtenemos los datos del usuario
-                cliente_data = self.cliente_controller.buscar_por_email(email)
+            # Buscar usuario por email
+            usuario_data = self.usuario_controller.buscar_por_email(email)
 
+            if usuario_data and usuario_data.contrasena == password:
+                # ¡Éxito! Ahora obtenemos los datos del usuario
                 # Determinamos el nombre para el saludo
-                if cliente_data and cliente_data.nombre:
-                    nombre_saludo = cliente_data.nombre
-                else:
-                    nombre_saludo = email  # Fallback si no tiene nombre
+
+
+                sesion.set_usuario_id(usuario_data.id_usuario)
+                auditoria.Auditoria().registrar_ingreso(usuario_data.id_usuario)
+
+                print("hasta aqui corre")
+                nombre_saludo = sesion.get_usuario_nombre(usuario_data.id_usuario)
+
 
                 self.login_success(nombre_saludo)
 

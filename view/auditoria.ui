@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1200</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Registro de Auditoría - Ingresos y Salidas</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_main">
+    <item>
+     <widget class="QLabel" name="label_titulo">
+      <property name="text">
+       <string>&lt;html&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style="font-size:16pt; font-weight:600;"&gt;📋 Registro de Auditoría&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="groupBox_filtros">
+      <property name="title">
+       <string>Filtros y Búsqueda</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_filtros">
+       <item>
+        <widget class="QLabel" name="label_filtro">
+         <property name="text">
+          <string>Mostrar:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="comboBox_filtro">
+         <item>
+          <property name="text">
+           <string>Todos los registros</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Solo sesiones activas</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Solo sesiones cerradas</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_fecha_inicio">
+         <property name="text">
+          <string>Desde:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDateEdit" name="dateEdit_inicio">
+         <property name="calendarPopup">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_fecha_fin">
+         <property name="text">
+          <string>Hasta:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDateEdit" name="dateEdit_fin">
+         <property name="calendarPopup">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_aplicar_filtro">
+         <property name="text">
+          <string>🔍 Filtrar</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEdit_buscar_usuario">
+         <property name="placeholderText">
+          <string>Buscar por ID o nombre de usuario...</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_buscar">
+         <property name="text">
+          <string>Buscar</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_refrescar">
+         <property name="text">
+          <string>🔄 Refrescar</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="groupBox_estadisticas">
+      <property name="title">
+       <string>Estadísticas</string>
+      </property>
+      <property name="maximumHeight">
+       <number>80</number>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_stats">
+       <item>
+        <widget class="QLabel" name="label_total_registros">
+         <property name="text">
+          <string>📊 Total Registros: 0</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_sesiones_activas">
+         <property name="text">
+          <string>🟢 Sesiones Activas: 0</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_sesiones_cerradas">
+         <property name="text">
+          <string>🔴 Sesiones Cerradas: 0</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTableWidget" name="tableWidget_auditoria">
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <column>
+       <property name="text">
+        <string>ID Registro</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Fecha Ingreso</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Fecha Salida</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Duración</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ID Usuario</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Nombre Usuario</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Estado</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_botones">
+      <item>
+       <widget class="QLabel" name="label_info">
+        <property name="text">
+         <string>Seleccione un registro para ver detalles</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_exportar">
+        <property name="text">
+         <string>📄 Exportar a CSV</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_ver_detalles">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>👁️ Ver Detalles Usuario</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

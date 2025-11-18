@@ -57,3 +57,14 @@ class DatabaseConfig:
                 cursor.executemany(sql, data_list)
                 conn.commit()
                 return cursor.rowcount
+
+
+def get_connection():
+    """Función auxiliar para obtener una conexión directa"""
+    return oracledb.connect(
+        user=DatabaseConfig.DB_USER,
+        password=DatabaseConfig.DB_PASSWORD,
+        host=DatabaseConfig.DB_HOST,
+        port=DatabaseConfig.DB_PORT,
+        sid=DatabaseConfig.DB_SID
+    )

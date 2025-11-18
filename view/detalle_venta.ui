@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>FormDetalleFactura</class>
+ <widget class="QWidget" name="FormDetalleFactura">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>650</width>
+    <height>580</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Detalle de Factura</string>
+  </property>
+
+  <layout class="QVBoxLayout" name="verticalLayout">
+
+   <!-- Encabezado -->
+   <item>
+    <layout class="QHBoxLayout">
+
+     <item>
+      <layout class="QVBoxLayout">
+       <item>
+        <widget class="QLabel" name="lbl_titulo">
+         <property name="text">
+          <string style="font-size:18px; font-weight:bold;">FACTURA</string>
+         </property>
+        </widget>
+       </item>
+
+       <item>
+        <widget class="QLabel" name="lbl_numero_factura">
+         <property name="text">
+          <string>Número: -</string>
+         </property>
+        </widget>
+       </item>
+
+       <item>
+        <widget class="QLabel" name="lbl_fecha">
+         <property name="text">
+          <string>Fecha: -</string>
+         </property>
+        </widget>
+       </item>
+
+       <item>
+        <widget class="QLabel" name="lbl_cliente">
+         <property name="text">
+          <string>Cliente: -</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+
+    </layout>
+   </item>
+
+   <!-- Tabla -->
+   <item>
+    <widget class="QTableWidget" name="tabla_detalle"/>
+   </item>
+
+   <!-- Totales -->
+   <item>
+    <layout class="QVBoxLayout">
+     <item>
+      <widget class="QLabel" name="lbl_bruto">
+       <property name="text">
+        <string>Total Bruto: -</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lbl_iva">
+       <property name="text">
+        <string>IVA: -</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lbl_total">
+       <property name="text">
+        <string>Total Neto: -</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+   <!-- Botones -->
+   <item>
+    <layout class="QHBoxLayout">
+
+     <item>
+      <widget class="QPushButton" name="btn_generar_pdf">
+       <property name="text">
+        <string>Guardar PDF</string>
+       </property>
+      </widget>
+     </item>
+
+     <item>
+      <widget class="QPushButton" name="btn_cerrar">
+       <property name="text">
+        <string>Cerrar</string>
+       </property>
+      </widget>
+     </item>
+
+    </layout>
+   </item>
+
+  </layout>
+
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

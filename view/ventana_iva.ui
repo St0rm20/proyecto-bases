@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="windowTitle">
+   <string>Reporte IVA Trimestral</string>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>420</width>
+    <height>260</height>
+   </size>
+  </property>
+
+  <layout class="QVBoxLayout" name="verticalLayout">
+
+   <!-- TÍTULO PRINCIPAL -->
+   <item>
+    <widget class="QLabel" name="lbl_titulo">
+     <property name="text">
+      <string>Reporte IVA Trimestral - DIAN</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font-size: 20px; font-weight: bold;</string>
+     </property>
+    </widget>
+   </item>
+
+   <!-- SECCIÓN DE AÑO -->
+   <item>
+    <layout class="QHBoxLayout" name="layout_anio">
+     <item>
+      <widget class="QLabel" name="lbl_anio">
+       <property name="text">
+        <string>Año:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="combo_anio"/>
+     </item>
+    </layout>
+   </item>
+
+   <!-- SECCIÓN DE TRIMESTRE -->
+   <item>
+    <layout class="QHBoxLayout" name="layout_trimestre">
+     <item>
+      <widget class="QLabel" name="lbl_trimestre">
+       <property name="text">
+        <string>Trimestre:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="combo_trimestre"/>
+     </item>
+    </layout>
+   </item>
+
+   <!-- BOTONES -->
+   <item>
+    <layout class="QHBoxLayout" name="layout_botones">
+
+     <item>
+      <widget class="QPushButton" name="btn_generar">
+       <property name="text">
+        <string>Generar PDF</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: #2e7d32; color: white; padding: 6px;</string>
+       </property>
+      </widget>
+     </item>
+
+     <item>
+      <widget class="QPushButton" name="btn_cerrar">
+       <property name="text">
+        <string>Cerrar</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: #c62828; color: white; padding: 6px;</string>
+       </property>
+      </widget>
+     </item>
+
+    </layout>
+   </item>
+
+  </layout>
+ </widget>
+
+ <resources/>
+ <connections/>
+</ui>

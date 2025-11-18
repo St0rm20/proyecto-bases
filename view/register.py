@@ -1,5 +1,5 @@
 """
-Ventana de Registro de Nuevos Clientes
+Ventana de Registro de Nuevos Usuarios
 Por: Juan David Ramirez Carmona y Miguel Ángel Vargas Peláez
 Fecha: 2025-11
 Licencia: GPLv3
@@ -8,13 +8,13 @@ Licencia: GPLv3
 import sys
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QMessageBox
-# Importamos la clase Cliente que maneja la lógica de BD
-from model.cliente import Cliente
+# Importamos la clase Usuario que maneja la lógica de BD
+from model.usuario import Usuario
 
 
 class RegisterWindow(QtWidgets.QMainWindow):
     """
-    Clase para la ventana de Registro de Nuevos Clientes.
+    Clase para la ventana de Registro de Nuevos Usuarios.
     """
 
     def __init__(self, login_window):
@@ -34,9 +34,9 @@ class RegisterWindow(QtWidgets.QMainWindow):
             print("Error: Asegúrate de que 'register_window.ui' esté en el mismo directorio.")
             sys.exit(1)
 
-        # Instanciar el controlador de Cliente
+        # Instanciar el controlador de Usuario
         try:
-            self.cliente_controller = Cliente()
+            self.usuario_controller = Usuario()
         except Exception as e:
             QMessageBox.critical(self, "Error de Base de Datos",
                                  f"No se pudo conectar a la base de datos.\nError: {e}")
@@ -50,7 +50,7 @@ class RegisterWindow(QtWidgets.QMainWindow):
         self.statusBar().showMessage("Por favor, ingrese sus datos para registrarse.")
 
         # Enfocar el primer campo
-        self.lineEdit_codigo.setFocus()
+        self.lineEdit_id_usuario.setFocus()
 
     def get_rol_id(self):
         """
@@ -59,9 +59,11 @@ class RegisterWindow(QtWidgets.QMainWindow):
         """
         rol_texto = self.comboBox_rol.currentText()
 
-        if rol_texto == "Usuario Paramétrico":
+        if rol_texto == "Administrador":
+            return 1
+        elif rol_texto == "Usuario Regular":
             return 2
-        elif rol_texto == "Usuario Esporádico":
+        elif rol_texto == "Usuario Invitado":
             return 3
         else:
             return None  # No se seleccionó un tipo válido
@@ -71,8 +73,8 @@ class RegisterWindow(QtWidgets.QMainWindow):
         Maneja la lógica de registro al presionar el botón.
         """
         # 1. Recoger los datos de los campos OBLIGATORIOS
-        codigo_str = self.lineEdit_codigo.text().strip()
-        nombre = self.lineEdit_nombre.text().strip()
+        id_usuario_str = self.lineEdit_id_usuario.text().strip()
+        nombre_usuario = self.lineEdit_nombre_usuario.text().strip()
         email = self.lineEdit_email.text().strip()
         password = self.lineEdit_password.text()
         password_confirm = self.lineEdit_password_confirm.text()
@@ -81,12 +83,12 @@ class RegisterWindow(QtWidgets.QMainWindow):
         id_rol = self.get_rol_id()
 
         # 2. Validaciones de campos OBLIGATORIOS
-        if not all([codigo_str, nombre, email, password, password_confirm]):
+        if not all([id_usuario_str, nombre_usuario, email, password, password_confirm]):
             self.statusBar().showMessage("Error: Los campos marcados con * son obligatorios.")
             QMessageBox.warning(self, "Campos Vacíos",
                                 "Por favor, llene todos los campos obligatorios:\n"
-                                "- Código (Cédula)\n"
-                                "- Nombre Completo\n"
+                                "- ID de Usuario\n"
+                                "- Nombre de Usuario\n"
                                 "- Email\n"
                                 "- Tipo de Usuario\n"
                                 "- Contraseña y Confirmación")
@@ -125,50 +127,38 @@ class RegisterWindow(QtWidgets.QMainWindow):
             self.lineEdit_password.setFocus()
             return
 
-        # Validar que el código sea un número
+        # Validar que el ID sea un número
         try:
-            codigo_cliente = int(codigo_str)
+            id_usuario = int(id_usuario_str)
         except ValueError:
-            self.statusBar().showMessage("Error: El código (cédula) debe ser un número.")
+            self.statusBar().showMessage("Error: El ID de usuario debe ser un número.")
             QMessageBox.warning(self, "Dato Inválido",
-                                "El código (cédula) debe ser un valor numérico.")
-            self.lineEdit_codigo.setFocus()
+                                "El ID de usuario debe ser un valor numérico.")
+            self.lineEdit_id_usuario.setFocus()
             return
 
-        # 3. Recoger campos OPCIONALES
-        telefono = self.lineEdit_telefono.text().strip() or None
-        departamento = self.lineEdit_departamento.text().strip() or None
-        municipio = self.lineEdit_municipio.text().strip() or None
-        calle = self.lineEdit_calle.text().strip() or None
-        direccion = self.lineEdit_direccion.text().strip() or None
-
-        # 4. Intentar crear el cliente usando el controlador
+        # 3. Intentar crear el usuario usando el controlador
         try:
-            # Se llama al método crear() del modelo Cliente
-            success = self.cliente_controller.crear(
-                codigo_cliente=codigo_cliente,
-                nombre=nombre,
+            # Se llama al método crear() del modelo Usuario
+            success = self.usuario_controller.crear(
+                id_usuario=id_usuario,
+                nombre_usuario=nombre_usuario,
                 email=email,
                 contrasena=password,
-                id_rol=id_rol,
-                telefono=telefono,
-                departamento=departamento,
-                municipio=municipio,
-                calle=calle,
-                direccion=direccion
+                id_rol=id_rol
             )
 
             if success:
-                self.register_success(nombre)
+                self.register_success(nombre_usuario)
             else:
                 # Esto puede pasar si el 'crear' retorna False (ej. clave duplicada)
-                self.register_failure("El código o email ya podría estar en uso.")
+                self.register_failure("El ID de usuario o email ya podría estar en uso.")
 
         except Exception as e:
             # Captura errores específicos de la BD (ej. ORA-00001: unique constraint violated)
             error_msg = str(e)
             if "UNIQUE constraint" in error_msg or "ORA-00001" in error_msg:
-                self.register_failure("El código (cédula) o el email ya están registrados.")
+                self.register_failure("El ID de usuario o el email ya están registrados.")
             else:
                 self.register_failure(f"Error inesperado de la base de datos:\n{e}")
 

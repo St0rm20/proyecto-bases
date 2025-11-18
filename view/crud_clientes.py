@@ -69,15 +69,12 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
         # Tabla
         self.tableWidget_clientes.itemSelectionChanged.connect(self.cliente_seleccionado_cambio)
 
-        # Checkbox de contraseña
-        self.checkBox_cambiar_contrasena.stateChanged.connect(self.toggle_cambiar_contrasena)
-
     def configurar_tabla(self):
         """Configura las propiedades de la tabla"""
         self.tableWidget_clientes.setColumnWidth(0, 100)  # Código
         self.tableWidget_clientes.setColumnWidth(1, 200)  # Nombre
-        self.tableWidget_clientes.setColumnWidth(2, 180)  # Email
-        self.tableWidget_clientes.setColumnWidth(3, 120)  # Teléfono
+        self.tableWidget_clientes.setColumnWidth(2, 120)  # Teléfono
+        self.tableWidget_clientes.setColumnWidth(3, 150)  # Departamento
         self.tableWidget_clientes.setColumnWidth(4, 150)  # Municipio
 
         # Ordenar por código al hacer clic en el header
@@ -135,8 +132,8 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
             # Agregar datos a las columnas
             self.tableWidget_clientes.setItem(fila, 0, QTableWidgetItem(str(cliente.codigo_cliente)))
             self.tableWidget_clientes.setItem(fila, 1, QTableWidgetItem(cliente.nombre))
-            self.tableWidget_clientes.setItem(fila, 2, QTableWidgetItem(cliente.email or ""))
-            self.tableWidget_clientes.setItem(fila, 3, QTableWidgetItem(cliente.telefono or ""))
+            self.tableWidget_clientes.setItem(fila, 2, QTableWidgetItem(cliente.telefono or ""))
+            self.tableWidget_clientes.setItem(fila, 3, QTableWidgetItem(cliente.departamento or ""))
             self.tableWidget_clientes.setItem(fila, 4, QTableWidgetItem(cliente.municipio or ""))
 
             # Guardar el objeto completo en la primera celda
@@ -165,40 +162,21 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
         """Muestra los detalles del cliente en el formulario"""
         self.lineEdit_codigo.setText(str(cliente.codigo_cliente))
         self.lineEdit_nombre.setText(cliente.nombre)
-        self.lineEdit_email.setText(cliente.email or "")
         self.lineEdit_telefono.setText(cliente.telefono or "")
         self.lineEdit_departamento.setText(cliente.departamento or "")
         self.lineEdit_municipio.setText(cliente.municipio or "")
         self.lineEdit_calle.setText(cliente.calle or "")
         self.lineEdit_direccion.setText(cliente.direccion or "")
 
-        # Establecer rol
-        if cliente.id_rol == 2:
-            self.comboBox_rol.setCurrentIndex(1)  # Usuario Paramétrico
-        elif cliente.id_rol == 3:
-            self.comboBox_rol.setCurrentIndex(2)  # Usuario Esporádico
-        else:
-            self.comboBox_rol.setCurrentIndex(0)  # Sin asignar
-
-        # Limpiar campos de contraseña
-        self.checkBox_cambiar_contrasena.setChecked(False)
-        self.lineEdit_nueva_contrasena.clear()
-        self.lineEdit_confirmar_contrasena.clear()
-
     def limpiar_formulario(self):
         """Limpia todos los campos del formulario"""
         self.lineEdit_codigo.clear()
         self.lineEdit_nombre.clear()
-        self.lineEdit_email.clear()
         self.lineEdit_telefono.clear()
         self.lineEdit_departamento.clear()
         self.lineEdit_municipio.clear()
         self.lineEdit_calle.clear()
         self.lineEdit_direccion.clear()
-        self.comboBox_rol.setCurrentIndex(0)
-        self.checkBox_cambiar_contrasena.setChecked(False)
-        self.lineEdit_nueva_contrasena.clear()
-        self.lineEdit_confirmar_contrasena.clear()
         self.cliente_seleccionado = None
 
     def cambiar_modo(self, modo):
@@ -234,19 +212,15 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
             self.pushButton_guardar.setEnabled(True)
             self.pushButton_cancelar.setEnabled(True)
             self.lineEdit_codigo.setEnabled(True)
-            self.checkBox_cambiar_contrasena.setChecked(True)  # Nueva contraseña es obligatoria
 
     def habilitar_formulario(self, habilitar):
         """Habilita o deshabilita los campos del formulario"""
         self.lineEdit_nombre.setEnabled(habilitar)
-        self.lineEdit_email.setEnabled(habilitar)
         self.lineEdit_telefono.setEnabled(habilitar)
         self.lineEdit_departamento.setEnabled(habilitar)
         self.lineEdit_municipio.setEnabled(habilitar)
         self.lineEdit_calle.setEnabled(habilitar)
         self.lineEdit_direccion.setEnabled(habilitar)
-        self.comboBox_rol.setEnabled(habilitar)
-        self.checkBox_cambiar_contrasena.setEnabled(habilitar)
 
     def modo_nuevo_cliente(self):
         """Activa el modo para crear un nuevo cliente"""
@@ -265,22 +239,6 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
         self.lineEdit_nombre.setFocus()
         self.statusBar().showMessage("Editando cliente. Realice los cambios y guarde.")
 
-    def toggle_cambiar_contrasena(self, state):
-        """Habilita/deshabilita los campos de contraseña"""
-        self.widget_password.setEnabled(state == Qt.Checked)
-        if state != Qt.Checked:
-            self.lineEdit_nueva_contrasena.clear()
-            self.lineEdit_confirmar_contrasena.clear()
-
-    def get_rol_id(self):
-        """Obtiene el ID del rol seleccionado"""
-        rol_texto = self.comboBox_rol.currentText()
-        if rol_texto == "Usuario Paramétrico":
-            return 2
-        elif rol_texto == "Usuario Esporádico":
-            return 3
-        return None
-
     def validar_formulario(self):
         """Valida que los campos obligatorios estén llenos"""
         if not self.lineEdit_codigo.text().strip():
@@ -292,28 +250,6 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
             QMessageBox.warning(self, "Validación", "El nombre es obligatorio.")
             self.lineEdit_nombre.setFocus()
             return False
-
-        if not self.lineEdit_email.text().strip():
-            QMessageBox.warning(self, "Validación", "El email es obligatorio.")
-            self.lineEdit_email.setFocus()
-            return False
-
-        # Validar contraseña si está marcado el checkbox
-        if self.checkBox_cambiar_contrasena.isChecked():
-            pwd = self.lineEdit_nueva_contrasena.text()
-            pwd_conf = self.lineEdit_confirmar_contrasena.text()
-
-            if not pwd or not pwd_conf:
-                QMessageBox.warning(self, "Validación", "Debe ingresar y confirmar la contraseña.")
-                return False
-
-            if len(pwd) < 6:
-                QMessageBox.warning(self, "Validación", "La contraseña debe tener al menos 6 caracteres.")
-                return False
-
-            if pwd != pwd_conf:
-                QMessageBox.warning(self, "Validación", "Las contraseñas no coinciden.")
-                return False
 
         return True
 
@@ -329,36 +265,23 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
             return
 
         nombre = self.lineEdit_nombre.text().strip()
-        email = self.lineEdit_email.text().strip()
         telefono = self.lineEdit_telefono.text().strip() or None
         departamento = self.lineEdit_departamento.text().strip() or None
         municipio = self.lineEdit_municipio.text().strip() or None
         calle = self.lineEdit_calle.text().strip() or None
         direccion = self.lineEdit_direccion.text().strip() or None
-        id_rol = self.get_rol_id()
-
-        contrasena = None
-        if self.checkBox_cambiar_contrasena.isChecked():
-            contrasena = self.lineEdit_nueva_contrasena.text()
 
         try:
             if self.modo_actual == "nuevo":
                 # Crear nuevo cliente
-                if not contrasena:
-                    QMessageBox.warning(self, "Error", "Debe establecer una contraseña para el nuevo cliente.")
-                    return
-
                 exito = self.cliente_controller.crear(
                     codigo_cliente=codigo,
                     nombre=nombre,
-                    email=email,
                     telefono=telefono,
                     departamento=departamento,
                     municipio=municipio,
                     calle=calle,
-                    direccion=direccion,
-                    contrasena=contrasena,
-                    id_rol=id_rol
+                    direccion=direccion
                 )
 
                 if exito:
@@ -376,14 +299,11 @@ class CRUDClientesWindow(QtWidgets.QMainWindow):
                 exito = self.cliente_controller.actualizar(
                     codigo_cliente=codigo,
                     nombre=nombre,
-                    email=email,
                     telefono=telefono,
                     departamento=departamento,
                     municipio=municipio,
                     calle=calle,
-                    direccion=direccion,
-                    contrasena=contrasena,
-                    id_rol=id_rol
+                    direccion=direccion
                 )
 
                 if exito:

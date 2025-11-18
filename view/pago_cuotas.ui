@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1000</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Pago de Cuotas - Sistema de Créditos</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_main">
+    <item>
+     <!-- Título -->
+     <widget class="QLabel" name="label_titulo">
+      <property name="text">
+       <string>&lt;html&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style="font-size:18pt; font-weight:600;"&gt;💳 Pago de Cuotas&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
+    </item>
+
+    <item>
+     <!-- Selección de Crédito -->
+     <widget class="QGroupBox" name="groupBox_seleccion">
+      <property name="title">
+       <string>Selección de Crédito</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_seleccion">
+       <item>
+        <widget class="QLabel" name="label_credito">
+         <property name="text">
+          <string>Crédito Activo:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="comboBox_creditos">
+         <property name="minimumWidth">
+          <number>300</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_cargar">
+         <property name="text">
+          <string>🔄 Refrescar Créditos</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_paneles">
+      <item>
+       <!-- Panel Izquierdo: Información del Cliente y Crédito -->
+       <widget class="QGroupBox" name="groupBox_info_credito">
+        <property name="title">
+         <string>Información del Crédito</string>
+        </property>
+        <property name="minimumWidth">
+         <number>450</number>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_info">
+         <!-- Datos del Cliente -->
+         <item>
+          <widget class="QGroupBox" name="groupBox_cliente">
+           <property name="title">
+            <string>Datos del Cliente</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_cliente">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_nombre_cliente_label">
+              <property name="text">
+               <string>Cliente:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="label_nombre_cliente">
+              <property name="text">
+               <string>-</string>
+              </property>
+              <property name="styleSheet">
+               <string>font-weight: bold;</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_telefono_label">
+              <property name="text">
+               <string>Teléfono:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="label_telefono">
+              <property name="text">
+               <string>-</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_codigo_venta_label">
+              <property name="text">
+               <string>Código Venta:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="label_codigo_venta">
+              <property name="text">
+               <string>-</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+
+         <!-- Detalles del Crédito -->
+         <item>
+          <widget class="QGroupBox" name="groupBox_detalles_credito">
+           <property name="title">
+            <string>Detalles del Crédito</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_credito">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_cuota_inicial_label">
+              <property name="text">
+               <string>Cuota Inicial:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="label_cuota_inicial">
+              <property name="text">
+               <string>$0.00</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_saldo_financiado_label">
+              <property name="text">
+               <string>Saldo Financiado:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="label_saldo_financiado">
+              <property name="text">
+               <string>$0.00</string>
+              </property>
+              <property name="styleSheet">
+               <string>font-weight: bold; color: #0066CC;</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_interes_label">
+              <property name="text">
+               <string>Tasa de Interés:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="label_interes">
+              <property name="text">
+               <string>0.00%</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_plazo_label">
+              <property name="text">
+               <string>Plazo:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QLabel" name="label_plazo">
+              <property name="text">
+               <string>0 meses</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+
+         <!-- Estado de Cuotas -->
+         <item>
+          <widget class="QGroupBox" name="groupBox_cuotas">
+           <property name="title">
+            <string>Estado de Cuotas</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_cuotas">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_total_cuotas_label">
+              <property name="text">
+               <string>Total de Cuotas:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="label_total_cuotas">
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="styleSheet">
+               <string>font-weight: bold;</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_cuotas_pagadas_label">
+              <property name="text">
+               <string>Cuotas Pagadas:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="label_cuotas_pagadas">
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="styleSheet">
+               <string>font-weight: bold; color: #28A745;</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_cuotas_pendientes_label">
+              <property name="text">
+               <string>Cuotas Pendientes:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="label_cuotas_pendientes">
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="styleSheet">
+               <string>font-weight: bold; color: #DC3545;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+
+         <item>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </item>
+
+      <item>
+       <!-- Panel Derecho: Resumen Financiero y Pago -->
+       <widget class="QGroupBox" name="groupBox_pago">
+        <property name="title">
+         <string>Realizar Pago</string>
+        </property>
+        <property name="minimumWidth">
+         <number>450</number>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_pago">
+         <!-- Resumen Financiero -->
+         <item>
+          <widget class="QGroupBox" name="groupBox_resumen">
+           <property name="title">
+            <string>Resumen Financiero</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_resumen">
+            <item>
+             <widget class="QLabel" name="label_total_pagado">
+              <property name="text">
+               <string>💰 Total Pagado: $0.00</string>
+              </property>
+              <property name="styleSheet">
+               <string>font-size: 12pt; color: #28A745; font-weight: bold;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_saldo_pendiente">
+              <property name="text">
+               <string>⏳ Saldo Pendiente: $0.00</string>
+              </property>
+              <property name="styleSheet">
+               <string>font-size: 12pt; color: #DC3545; font-weight: bold;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QProgressBar" name="progressBar_pago">
+              <property name="value">
+               <number>0</number>
+              </property>
+              <property name="textVisible">
+               <bool>true</bool>
+              </property>
+              <property name="format">
+               <string>%p% completado</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+
+         <!-- Información de la Cuota Actual -->
+         <item>
+          <widget class="QGroupBox" name="groupBox_cuota_actual">
+           <property name="title">
+            <string>Cuota a Pagar</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_cuota_actual">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_numero_cuota_label">
+              <property name="text">
+               <string>Número de Cuota:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="label_numero_cuota">
+              <property name="text">
+               <string>-</string>
+              </property>
+              <property name="styleSheet">
+               <string>font-size: 14pt; font-weight: bold; color: #0066CC;</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_valor_cuota_label">
+              <property name="text">
+               <string>Valor de la Cuota:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="label_valor_cuota">
+              <property name="text">
+               <string>$0.00</string>
+              </property>
+              <property name="styleSheet">
+               <string>font-size: 16pt; font-weight: bold; color: #28A745;</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_fecha_vencimiento_label">
+              <property name="text">
+               <string>Fecha de Vencimiento:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="label_fecha_vencimiento">
+              <property name="text">
+               <string>-</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_estado_cuota_label">
+              <property name="text">
+               <string>Estado:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QLabel" name="label_estado_cuota">
+              <property name="text">
+               <string>Pendiente</string>
+              </property>
+              <property name="styleSheet">
+               <string>color: #FFC107; font-weight: bold;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+
+         <!-- Botón de Pago -->
+         <item>
+          <widget class="QPushButton" name="pushButton_realizar_pago">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="minimumHeight">
+            <number>60</number>
+           </property>
+           <property name="text">
+            <string>💵 REALIZAR PAGO</string>
+           </property>
+           <property name="styleSheet">
+            <string>
+             QPushButton {
+              font-size: 16pt;
+              font-weight: bold;
+              background-color: #28A745;
+              color: white;
+              border-radius: 8px;
+             }
+             QPushButton:hover {
+              background-color: #218838;
+             }
+             QPushButton:disabled {
+              background-color: #cccccc;
+              color: #666666;
+             }
+            </string>
+           </property>
+          </widget>
+         </item>
+
+         <!-- Información adicional -->
+         <item>
+          <widget class="QLabel" name="label_info_pago">
+           <property name="text">
+            <string>&lt;html&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style="font-size:9pt; font-style:italic;"&gt;Al realizar el pago, se actualizará el estado de la cuota y se generará el registro correspondiente.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+
+         <item>
+          <spacer name="verticalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -7,6 +7,7 @@ from cliente import Cliente
 from producto import Producto
 from venta import Venta
 from datetime import date
+from auditoria import Auditoria
 
 
 def ejemplo_roles():
@@ -17,6 +18,8 @@ def ejemplo_roles():
 
     # Crear roles
     print("Creando roles...")
+    rol.crear(1, "Administrador")
+    rol.crear(2, "Usuario Parametrico")
     rol.crear(3, "Usuario Esporadico")
 
 
@@ -176,9 +179,20 @@ def ejemplo_categoria():
     print("\nEjemplos de Categorias")
 
 
+def ejemplo_auditoria():
+    print("\nEjemplos de Auditoria")
+
+    auditoria = Auditoria()
+    # Registrar ingreso
+    print("Registrando ingreso...")
+    auditoria.registrar_ingreso(1001)
+    # Registrar salida
+    auditoria.registrar_salida(1001)
+
 if __name__ == "__main__":
     try:
         ejemplo_roles()
+        #ejemplo_auditoria()
         #ejemplo_clientes()
         #ejemplo_productos()
         #ejemplo_ventas()

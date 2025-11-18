@@ -20,9 +20,11 @@ class ProductoData:
     valor_adquisicion: Decimal
     valor_venta: Optional[Decimal]
     codigo_categoria: int
+    cantidad: int
 
     def __str__(self):
-        return f"Producto(codigo={self.codigo}, nombre='{self.nombre}', precio=${self.valor_venta})"
+        return (f"Producto(codigo={self.codigo}, nombre='{self.nombre}', "
+                f"precio=${self.valor_venta}, cant={self.cantidad})")
 
 
 class Producto(BaseModel):
@@ -36,13 +38,13 @@ class Producto(BaseModel):
 
     def crear(self, codigo: int, nombre: str, valor_adquisicion: float,
               codigo_categoria: int, descripcion: str = None,
-              valor_venta: float = None) -> bool:
+              valor_venta: float = None, cantidad: int = 0) -> bool:
         """Crea un nuevo producto"""
         sql = """
             INSERT INTO Producto (codigo, descripcion, nombre, valor_adquisicion, 
-                                 valor_venta, codigo_categoria)
+                                 valor_venta, codigo_categoria, cantidad)
             VALUES (:codigo, :descripcion, :nombre, :valor_adquisicion, 
-                    :valor_venta, :codigo_categoria)
+                    :valor_venta, :codigo_categoria, :cantidad)
         """
         try:
             self.db.execute_query(sql, {
@@ -51,7 +53,8 @@ class Producto(BaseModel):
                 'nombre': nombre,
                 'valor_adquisicion': valor_adquisicion,
                 'valor_venta': valor_venta,
-                'codigo_categoria': codigo_categoria
+                'codigo_categoria': codigo_categoria,
+                'cantidad': cantidad
             }, fetch=False)
             return True
         except Exception as e:
@@ -60,7 +63,7 @@ class Producto(BaseModel):
 
     def actualizar(self, codigo: int, nombre: str = None, descripcion: str = None,
                    valor_adquisicion: float = None, valor_venta: float = None,
-                   codigo_categoria: int = None) -> bool:
+                   codigo_categoria: int = None, cantidad: int = None) -> bool:  # ← AÑADIDO cantidad
         """Actualiza un producto existente"""
         campos = []
         params = {'codigo': codigo}
@@ -80,6 +83,9 @@ class Producto(BaseModel):
         if codigo_categoria is not None:
             campos.append("codigo_categoria = :codigo_categoria")
             params['codigo_categoria'] = codigo_categoria
+        if cantidad is not None:  # ← AÑADIDO: manejo del parámetro cantidad
+            campos.append("cantidad = :cantidad")
+            params['cantidad'] = cantidad
 
         if not campos:
             return False
@@ -96,19 +102,48 @@ class Producto(BaseModel):
     def obtener_todos_como_objetos(self) -> List[ProductoData]:
         """Obtiene todos los productos como objetos"""
         resultados = self.obtener_todos()
-        return [ProductoData(*r) for r in resultados]
+        # Si hay problemas con el orden de las columnas, usa mapeo explícito:
+        productos = []
+        for r in resultados:
+            producto = ProductoData(
+                codigo=r[0],
+                descripcion=r[1],
+                nombre=r[2],
+                valor_adquisicion=r[3],
+                valor_venta=r[4],
+                codigo_categoria=r[5],
+                cantidad=r[6] if len(r) > 6 else 0  # ← Maneja el caso donde pueda faltar la columna
+            )
+            productos.append(producto)
+        return productos
 
     def buscar_por_nombre(self, nombre: str) -> List[ProductoData]:
         """Busca productos por nombre"""
         sql = "SELECT * FROM Producto WHERE UPPER(nombre) LIKE UPPER(:nombre)"
         resultados = self.db.execute_query(sql, {'nombre': f'%{nombre}%'})
-        return [ProductoData(*r) for r in resultados]
+        return [ProductoData(
+            codigo=r[0],
+            descripcion=r[1],
+            nombre=r[2],
+            valor_adquisicion=r[3],
+            valor_venta=r[4],
+            codigo_categoria=r[5],
+            cantidad=r[6] if len(r) > 6 else 0
+        ) for r in resultados]
 
     def buscar_por_categoria(self, codigo_categoria: int) -> List[ProductoData]:
         """Obtiene todos los productos de una categoría"""
         sql = "SELECT * FROM Producto WHERE codigo_categoria = :categoria"
         resultados = self.db.execute_query(sql, {'categoria': codigo_categoria})
-        return [ProductoData(*r) for r in resultados]
+        return [ProductoData(
+            codigo=r[0],
+            descripcion=r[1],
+            nombre=r[2],
+            valor_adquisicion=r[3],
+            valor_venta=r[4],
+            codigo_categoria=r[5],
+            cantidad=r[6] if len(r) > 6 else 0
+        ) for r in resultados]
 
     def buscar_por_rango_precio(self, precio_min: float, precio_max: float) -> List[ProductoData]:
         """Busca productos en un rango de precios"""
@@ -121,4 +156,29 @@ class Producto(BaseModel):
             'precio_min': precio_min,
             'precio_max': precio_max
         })
-        return [ProductoData(*r) for r in resultados]
+        return [ProductoData(
+            codigo=r[0],
+            descripcion=r[1],
+            nombre=r[2],
+            valor_adquisicion=r[3],
+            valor_venta=r[4],
+            codigo_categoria=r[5],
+            cantidad=r[6] if len(r) > 6 else 0
+        ) for r in resultados]
+
+    def obtener_por_id(self, codigo: int) -> Optional[ProductoData]:
+        """Obtiene un producto por su código"""
+        sql = "SELECT * FROM Producto WHERE codigo = :codigo"
+        resultados = self.db.execute_query(sql, {'codigo': codigo})
+        if resultados:
+            r = resultados[0]
+            return ProductoData(
+                codigo=r[0],
+                descripcion=r[1],
+                nombre=r[2],
+                valor_adquisicion=r[3],
+                valor_venta=r[4],
+                codigo_categoria=r[5],
+                cantidad=r[6] if len(r) > 6 else 0
+            )
+        return None

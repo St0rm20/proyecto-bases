@@ -1,184 +1,224 @@
-from reportlab.lib.pagesizes import letter, A4
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib import colors
-from reportlab.lib.units import inch
-import tkinter as tk
-from tkinter import ttk, messagebox
-from datetime import datetime, timedelta
-import os
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from textwrap import dedent
+from database.connection import get_connection
+# <--- IMPORTANTE    # <--- IMPORTANTE
+from report.pdf_utils import crear_pdf
+def generar_factura_pdf(venta_id):
+    print("Factura solicitada para venta:", venta_id)
 
+    conn = get_connection()
+    cursor = conn.cursor()
 
-class ReportesVentas:
-    def __init__(self, db_connection):
-        self.db = db_connection
+    # Consulta CORREGIDA con nombres exactos de tablas y columnas
+    sql = dedent("""
+        SELECT 
+            v.codigo_venta,
+            v.fecha,
+            c.nombre AS cliente,
+            p.nombre AS producto,
+            dp.cantidad,
+            p.valor_venta,
+            (dp.cantidad * p.valor_venta) AS subtotal,  -- CALCULAR subtotal
+            v.total_bruto,
+            v.iva_total,
+            v.total_neto
+        FROM VENTA v
+        JOIN CLIENTE c ON v.codigo_cliente = c.codigo_cliente        -- CORREGIDO
+        JOIN DETALLEVENTAPRODUCTO dp ON dp.id_venta = v.id_venta     -- CORREGIDO
+        JOIN PRODUCTO p ON p.codigo = dp.codigo_producto             -- CORREGIDO
+        WHERE v.codigo_venta = :venta
+    """)
 
-    def generar_reporte_ventas_mes(self):
-        # Ventana para seleccionar mes y año
-        self.ventana_seleccion("Ventas por Mes", self._generar_reporte_ventas_mes)
+    cursor.execute(sql, {"venta": venta_id})
+    filas = cursor.fetchall()
 
-    def _generar_reporte_ventas_mes(self, mes, año):
-        try:
-            filename = f"reporte_ventas_{mes}_{año}.pdf"
-            doc = SimpleDocTemplate(filename, pagesize=A4)
-            elements = []
+    if not filas:
+        raise Exception(f"No existe la venta con código {venta_id}")
 
-            styles = getSampleStyleSheet()
+    nombre_pdf = f"factura_{venta_id}.pdf"
+    c = canvas.Canvas(nombre_pdf, pagesize=letter)
 
-            # Título
-            title = Paragraph(f"Reporte de Ventas - {mes}/{año}", styles['Title'])
-            elements.append(title)
-            elements.append(Spacer(1, 0.2 * inch))
+    # ENCABEZADO
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(200, 750, "FACTURA DE VENTA")
 
-            # Obtener datos
-            query = """
-            SELECT v.id_venta, c.nombres || ' ' || c.apellidos as cliente,
-                   v.fecha_venta, v.subtotal, v.iva_total, v.total, tv.nombre as tipo_venta
-            FROM venta v
-            JOIN cliente c ON v.id_cliente = c.id_cliente
-            JOIN tipo_venta tv ON v.id_tipo_venta = tv.id_tipo_venta
-            WHERE EXTRACT(MONTH FROM v.fecha_venta) = :mes
-            AND EXTRACT(YEAR FROM v.fecha_venta) = :año
-            ORDER BY v.fecha_venta
-            """
-            datos = self.db.execute_query(query, {'mes': mes, 'año': año})
+    # DATOS BÁSICOS
+    c.setFont("Helvetica", 12)
+    y = 710
 
-            # Encabezados de tabla
-            data = [['ID', 'Cliente', 'Fecha', 'Subtotal', 'IVA', 'Total', 'Tipo']]
+    codigo_venta, fecha, cliente, _, _, _, _, total_bruto, iva_total, total_neto = filas[0]
 
-            total_ventas = 0
-            total_iva = 0
+    c.drawString(50, y, f"Factura N°: {codigo_venta}")
+    y -= 20
+    c.drawString(50, y, f"Fecha: {fecha.strftime('%d/%m/%Y')}")  # Formatear fecha
+    y -= 20
+    c.drawString(50, y, f"Cliente: {cliente}")
+    y -= 40
 
-            for venta in datos:
-                data.append([
-                    str(venta[0]),
-                    venta[1],
-                    venta[2].strftime('%d/%m/%Y'),
-                    f"${venta[3]:,.2f}",
-                    f"${venta[4]:,.2f}",
-                    f"${venta[5]:,.2f}",
-                    venta[6]
-                ])
-                total_ventas += venta[5]
-                total_iva += venta[4]
+    # Detalles de productos
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(50, y, "Producto")
+    c.drawString(250, y, "Cantidad")
+    c.drawString(330, y, "Precio Unit.")
+    c.drawString(410, y, "Subtotal")
+    y -= 20
+    c.line(50, y, 550, y)
+    y -= 20
 
-            # Totales
-            data.append(['', '', '', '', '', '', ''])
-            data.append(['', '', 'TOTALES:', '', f"${total_iva:,.2f}", f"${total_ventas:,.2f}", ''])
+    c.setFont("Helvetica", 12)
 
-            # Crear tabla
-            table = Table(data)
-            table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -3), colors.beige),
-                ('FONTNAME', (0, -2), (-1, -1), 'Helvetica-Bold'),
-                ('BACKGROUND', (0, -2), (-1, -1), colors.lightgrey),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black)
-            ]))
+    for fila in filas:
+        _, _, _, producto, cantidad, precio, subtotal, _, _, _ = fila
 
-            elements.append(table)
-            doc.build(elements)
+        c.drawString(50, y, producto[:30])  # Limitar longitud del nombre
+        c.drawString(250, y, str(cantidad))
+        c.drawString(330, y, f"${precio:,.2f}")
+        c.drawString(410, y, f"${subtotal:,.2f}")
+        y -= 20
 
-            messagebox.showinfo("Éxito", f"Reporte generado: {filename}")
-            os.startfile(filename)  # Abrir el PDF automáticamente
+        # Salto de página si es necesario
+        if y < 100:
+            c.showPage()
+            y = 750
+            c.setFont("Helvetica", 12)
 
-        except Exception as e:
-            messagebox.showerror("Error", f"Error al generar reporte: {str(e)}")
+    # Totales
+    y -= 30
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(350, y, f"Bruto: ${total_bruto:,.2f}")
+    y -= 20
+    c.drawString(350, y, f"IVA: ${iva_total:,.2f}")
+    y -= 20
+    c.drawString(350, y, f"Total: ${total_neto:,.2f}")
 
-    def generar_reporte_inventario(self):
-        try:
-            filename = "reporte_inventario.pdf"
-            doc = SimpleDocTemplate(filename, pagesize=A4)
-            elements = []
+    c.save()
+    print(f"Factura generada con éxito: {nombre_pdf}")
+    return nombre_pdf
 
-            styles = getSampleStyleSheet()
+def reporte_total_ventas_mes(anio, mes):
+    conn = get_connection()
+    c = conn.cursor()
 
-            title = Paragraph("Reporte de Inventario por Categoría", styles['Title'])
-            elements.append(title)
-            elements.append(Spacer(1, 0.2 * inch))
+    sql = """
+        SELECT fecha, total_neto, cliente 
+        FROM venta
+        WHERE fecha BETWEEN
+              TO_DATE(:anio || '-' || :mes || '-01','YYYY-MM-DD')
+        AND LAST_DAY(TO_DATE(:anio || '-' || :mes || '-01','YYYY-MM-DD'))
+    """
 
-            query = """
-            SELECT c.nombre as categoria, COUNT(p.id_producto) as cantidad,
-                   SUM(p.stock) as total_stock, 
-                   SUM(p.stock * p.valor_adquisicion) as costo_total
-            FROM categoria c
-            JOIN producto p ON c.id_categoria = p.id_categoria
-            WHERE p.estado = 'A'
-            GROUP BY c.nombre
-            ORDER BY c.nombre
-            """
-            datos = self.db.execute_query(query)
+    c.execute(sql, {"anio": anio, "mes": mes})
+    filas = c.fetchall()
 
-            data = [['Categoría', 'Productos', 'Stock Total', 'Costo Total']]
+    total = sum(f[1] for f in filas)
 
-            for item in datos:
-                data.append([
-                    item[0],
-                    str(item[1]),
-                    str(item[2]),
-                    f"${item[3]:,.2f}"
-                ])
+    headers = ["Fecha", "Total Neto", "Cliente"]
+    pdf_name = f"reporte_ventas_mes_{anio}_{mes}.pdf"
 
-            table = Table(data)
-            table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black)
-            ]))
+    crear_pdf(pdf_name, f"Ventas del Mes {anio}-{mes}", headers, filas + [("TOTAL", total, "")])
 
-            elements.append(table)
-            doc.build(elements)
+    return pdf_name
 
-            messagebox.showinfo("Éxito", f"Reporte generado: {filename}")
-            os.startfile(filename)
+# -------------------------------
+# REPORTE 3: IVA POR TRIMESTRE
+# -------------------------------
+def reporte_iva_trimestre(anio, trimestre):
+    conn = get_connection()
+    c = conn.cursor()
 
-        except Exception as e:
-            messagebox.showerror("Error", f"Error al generar reporte: {str(e)}")
+    sql = """
+        SELECT codigo_venta, fecha, iva_total
+        FROM venta
+        WHERE EXTRACT(YEAR FROM fecha) = :anio
+          AND CEIL(EXTRACT(MONTH FROM fecha)/3) = :trimestre
+    """
 
-    def ventana_seleccion(self, titulo, callback):
-        ventana = tk.Toplevel()
-        ventana.title(titulo)
-        ventana.geometry("300x200")
-        ventana.resizable(False, False)
+    c.execute(sql, {"anio": anio, "trimestre": trimestre})
+    filas = c.fetchall()
 
-        main_frame = ttk.Frame(ventana, padding="20")
-        main_frame.pack(fill=tk.BOTH, expand=True)
+    total = sum(f[2] for f in filas)
 
-        ttk.Label(main_frame, text="Mes:").grid(row=0, column=0, sticky='w', pady=5)
-        mes_combo = ttk.Combobox(main_frame, values=list(range(1, 13)), state="readonly")
-        mes_combo.grid(row=0, column=1, pady=5, padx=5, sticky='w')
-        mes_combo.set(datetime.now().month)
+    headers = ["Venta", "Fecha", "IVA"]
+    pdf_name = f"reporte_iva_Q{trimestre}_{anio}.pdf"
 
-        ttk.Label(main_frame, text="Año:").grid(row=1, column=0, sticky='w', pady=5)
-        año_combo = ttk.Combobox(main_frame,
-                                 values=list(range(2020, datetime.now().year + 1)),
-                                 state="readonly")
-        año_combo.grid(row=1, column=1, pady=5, padx=5, sticky='w')
-        año_combo.set(datetime.now().year)
+    crear_pdf(pdf_name, f"IVA Trimestre Q{trimestre} {anio}", headers, filas + [("TOTAL", "", total)])
 
-        def generar():
-            if mes_combo.get() and año_combo.get():
-                ventana.destroy()
-                callback(int(mes_combo.get()), int(año_combo.get()))
+    return pdf_name
 
-        ttk.Button(main_frame, text="Generar", command=generar).grid(row=2, column=0, columnspan=2, pady=20)
+# -------------------------------
+# REPORTE 4: VENTAS POR TIPO
+# -------------------------------
+def reporte_ventas_por_tipo(fecha_inicio, fecha_fin):
+    conn = get_connection()
+    c = conn.cursor()
 
-    # Implementar otros reportes similares...
-    def generar_reporte_morosos(self):
-        pass
+    sql = """
+        SELECT tipo_venta, COUNT(*)
+        FROM venta
+        WHERE fecha BETWEEN TO_DATE(:fi,'YYYY-MM-DD')
+        AND TO_DATE(:ff,'YYYY-MM-DD')
+        GROUP BY tipo_venta
+    """
 
-    def generar_reporte_iva(self):
-        pass
+    c.execute(sql, {"fi": fecha_inicio, "ff": fecha_fin})
+    filas = c.fetchall()
 
-    def generar_reporte_facturas(self):
-        pass
+    headers = ["Tipo Venta", "Cantidad"]
+    pdf_name = f"reporte_ventas_tipo_{fecha_inicio}_{fecha_fin}.pdf"
+
+    crear_pdf(pdf_name, f"Ventas por Tipo", headers, filas)
+
+    return pdf_name
+
+def reporte_inventario_por_categoria():
+    conn = get_connection()
+    c = conn.cursor()
+
+    sql = """
+        SELECT p.codigo,
+               p.nombre,
+               p.codigo_categoria,
+               p.valor_adquisicion,
+               p.valor_venta
+        FROM Producto p
+        ORDER BY p.codigo_categoria, p.nombre
+    """
+
+    c.execute(sql)
+    filas = c.fetchall()
+
+    headers = ["Código", "Producto", "Categoría", "Adquisición", "Venta"]
+    pdf_name = "reporte_inventario.pdf"
+
+    crear_pdf(pdf_name, "Inventario de Productos por Categoría", headers, filas)
+
+    return pdf_name
+
+# -------------------------------
+# REPORTE 6: CLIENTES MOROSOS
+# -------------------------------
+def reporte_clientes_morosos():
+    conn = get_connection()
+    c = conn.cursor()
+
+    sql = """
+        SELECT cl.nombre, v.codigo_venta, cu.codigo_cuota,
+               cu.fecha_vencimiento_cuota, cu.estado_cuota
+        FROM cliente cl
+        JOIN venta v ON v.cliente = cl.codigo_cliente
+        JOIN credito cr ON cr.venta = v.codigo_venta
+        JOIN cuota cu ON cu.credito = cr.credito_id
+        WHERE cu.estado_cuota IN ('VENCIDA', 'PENDIENTE')
+        ORDER BY cl.nombre
+    """
+
+    c.execute(sql)
+    filas = c.fetchall()
+
+    headers = ["Cliente", "Venta", "Cuota", "Vencimiento", "Estado"]
+    pdf_name = "reporte_morosos.pdf"
+
+    crear_pdf(pdf_name, "Clientes Morosos", headers, filas)
+
+    return pdf_name

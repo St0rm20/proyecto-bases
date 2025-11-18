@@ -12,6 +12,8 @@ from PyQt5.QtCore import Qt
 from decimal import Decimal
 from model.producto import Producto, ProductoData
 from model.categoria import Categoria, CategoriaData
+from model.usuario import Usuario  # ← CAMBIADO: Cliente por Usuario
+from util import sesion
 
 
 class CRUDProductosWindow(QtWidgets.QMainWindow):
@@ -33,6 +35,7 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
         try:
             self.producto_controller = Producto()
             self.categoria_controller = Categoria()
+            self.usuario_controller = Usuario()
         except Exception as e:
             QMessageBox.critical(self, "Error de Base de Datos",
                                  f"No se pudo conectar a la base de datos.\nError: {e}")
@@ -42,12 +45,16 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
         self.modo_actual = "visualizacion"
         self.producto_seleccionado = None
         self.categorias = []  # Lista de categorías disponibles
+        self.es_solo_lectura = False  # ← AÑADIR: Control de permisos
 
         # Conectar señales
         self.conectar_senales()
 
         # Configurar tabla
         self.configurar_tabla()
+
+        # Verificar permisos del usuario
+        self.verificar_permisos()
 
         # Cargar categorías
         self.cargar_categorias()
@@ -57,6 +64,7 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
 
         # Inicializar estado
         self.limpiar_formulario()
+        self.cambiar_modo("visualizacion")
         self.statusBar().showMessage("Listo. Seleccione un producto o cree uno nuevo.")
 
     def conectar_senales(self):
@@ -89,14 +97,85 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
 
     def configurar_tabla(self):
         """Configura las propiedades de la tabla"""
-        self.tableWidget_productos.setColumnWidth(0, 80)  # Código
-        self.tableWidget_productos.setColumnWidth(1, 220)  # Nombre
+        self.tableWidget_productos.setColumnWidth(0, 80)   # Código
+        self.tableWidget_productos.setColumnWidth(1, 200)  # Nombre
         self.tableWidget_productos.setColumnWidth(2, 130)  # Valor Adquisición
         self.tableWidget_productos.setColumnWidth(3, 130)  # Valor Venta
         self.tableWidget_productos.setColumnWidth(4, 100)  # Ganancia
-        self.tableWidget_productos.setColumnWidth(5, 100)  # Categoría
+        self.tableWidget_productos.setColumnWidth(5, 80)   # Cantidad ← AÑADIDO
+        self.tableWidget_productos.setColumnWidth(6, 100)  # Categoría
 
         self.tableWidget_productos.setSortingEnabled(True)
+
+    def verificar_permisos(self):
+        """
+        Verifica los permisos del usuario logueado.
+        Si el rol es 3 (Usuario Esporádico), solo permite lectura.
+        """
+        # Verificar si hay usuario logueado
+        if not sesion.is_logged_in():
+            QMessageBox.warning(
+                self,
+                "Sesión Requerida",
+                "Debe iniciar sesión para acceder a esta sección."
+            )
+            self.close()
+            return
+
+        # Obtener ID del usuario
+        usuario_id = sesion.get_usuario_id()
+
+        try:
+            # Obtener datos del usuario ← CAMBIADO: Cliente por Usuario
+            usuario = self.usuario_controller.obtener_por_id(usuario_id)
+
+            if not usuario:
+                QMessageBox.warning(self, "Error", "Usuario no encontrado en el sistema.")
+                self.close()
+                return
+
+            # Convertir tupla a objeto si es necesario
+            if isinstance(usuario, tuple):
+                # Asumiendo el orden: id_usuario, nombre_usuario, email, contrasena, id_rol
+                id_rol = usuario[4] if len(usuario) > 4 else None
+            else:
+                id_rol = usuario.id_rol
+
+            # Verificar el rol
+            if id_rol == 3:
+                # Usuario Esporádico - SOLO LECTURA
+                self.es_solo_lectura = True
+                self.aplicar_modo_solo_lectura()
+                self.statusBar().showMessage(
+                    "⚠️ Modo Solo Lectura: Usuario Esporádico no puede editar productos"
+                )
+            else:
+                # Roles 1 (Admin) o 2 (Paramétrico) - PERMISOS COMPLETOS
+                self.es_solo_lectura = False
+                self.statusBar().showMessage("✅ Permisos completos habilitados")
+
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Error al verificar permisos:\n{e}")
+            print(f"Error en verificar_permisos: {e}")
+
+    def aplicar_modo_solo_lectura(self):
+        """
+        Deshabilita botones de edición para usuarios con solo lectura
+        """
+        self.pushButton_nuevo.setEnabled(False)
+        self.pushButton_editar.setEnabled(False)
+        self.pushButton_eliminar.setEnabled(False)
+        self.pushButton_guardar.setEnabled(False)
+
+        # Cambiar el título para indicar modo solo lectura
+        self.setWindowTitle("Gestión de Productos - 👁️ SOLO LECTURA")
+
+        # Agregar mensaje visual
+        self.label_modo.setText(
+            '<html><body><p align="center">'
+            '<span style="font-weight:600; color:#FF0000;">⚠️ Modo: Solo Lectura</span>'
+            '</p></body></html>'
+        )
 
     def cargar_categorias(self):
         """Carga las categorías desde la base de datos"""
@@ -111,21 +190,24 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
             self.comboBox_categoria.addItem("-- Seleccione una categoría --", None)
             self.comboBox_filtro_categoria.addItem("-- Todas las categorías --", None)
 
-            # Agregar categorías
+            # Agregar categorías - SOLO MOSTRAR NOMBRE
             for cat in self.categorias:
+                print(cat.nombre)
+                # En el comboBox principal: mostrar solo el nombre
                 self.comboBox_categoria.addItem(
-                    f"{cat.codigo_categoria} - IVA: {cat.iva}% | Utilidad: {cat.utilidad}%",
+                    cat.nombre,  # ← SOLO NOMBRE
                     cat.codigo_categoria
                 )
+                # En el filtro: mostrar solo el nombre también
                 self.comboBox_filtro_categoria.addItem(
-                    f"{cat.codigo_categoria}",
+                    cat.nombre,  # ← SOLO NOMBRE
                     cat.codigo_categoria
                 )
 
         except Exception as e:
             QMessageBox.warning(self, "Advertencia",
-                                f"No se pudieron cargar las categorías:\n{e}\n\n"
-                                "Asegúrese de tener categorías creadas en la base de datos.")
+                              f"No se pudieron cargar las categorías:\n{e}\n\n"
+                              "Asegúrese de tener categorías creadas en la base de datos.")
 
     def cargar_todos_productos(self):
         """Carga todos los productos en la tabla"""
@@ -181,7 +263,7 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
                 precio_max = float(precio_max_text) if precio_max_text else float('inf')
 
                 productos = [p for p in productos
-                             if p.valor_venta and precio_min <= float(p.valor_venta) <= precio_max]
+                           if p.valor_venta and precio_min <= float(p.valor_venta) <= precio_max]
 
             self.llenar_tabla(productos)
             self.statusBar().showMessage(f"Filtros aplicados: {len(productos)} productos.")
@@ -210,15 +292,46 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
             fila = self.tableWidget_productos.rowCount()
             self.tableWidget_productos.insertRow(fila)
 
-            # Calcular ganancia
-            ganancia = 0
-            porcentaje_ganancia = 0
-            if producto.valor_venta and producto.valor_adquisicion:
-                ganancia = float(producto.valor_venta) - float(producto.valor_adquisicion)
-                if producto.valor_adquisicion > 0:
-                    porcentaje_ganancia = (ganancia / float(producto.valor_adquisicion)) * 100
+            # Obtener categoría para calcular IVA
+            categoria_producto = None
+            for cat in self.categorias:
+                if cat.codigo_categoria == producto.codigo_categoria:
+                    categoria_producto = cat
+                    break
 
-            # Agregar datos
+            iva_decimal = float(categoria_producto.iva) if categoria_producto else 0
+
+            # Calcular ganancia NETA (considerando IVA)
+            ganancia_bruta = 0
+            ganancia_neta = 0
+            porcentaje_ganancia_bruta = 0
+            porcentaje_ganancia_neta = 0
+
+            if producto.valor_venta and producto.valor_adquisicion:
+                # Ganancia bruta
+                ganancia_bruta = float(producto.valor_venta) - float(producto.valor_adquisicion)
+
+                # Calcular IVA a pagar
+                base_imponible = float(producto.valor_venta) / (1 + iva_decimal) if iva_decimal > 0 else float(
+                    producto.valor_venta)
+                iva_a_pagar = base_imponible * iva_decimal
+
+                # Ganancia neta (después de pagar IVA)
+                ganancia_neta = ganancia_bruta - iva_a_pagar
+
+                # Porcentajes
+                if producto.valor_adquisicion > 0:
+                    porcentaje_ganancia_bruta = (ganancia_bruta / float(producto.valor_adquisicion)) * 100
+                    porcentaje_ganancia_neta = (ganancia_neta / float(producto.valor_adquisicion)) * 100
+
+            # Obtener nombre de categoría
+            nombre_categoria = str(producto.codigo_categoria)
+            for cat in self.categorias:
+                if cat.codigo_categoria == producto.codigo_categoria:
+                    nombre_categoria = cat.nombre
+                    break
+
+            # Agregar datos - MOSTRAR GANANCIA NETA
             self.tableWidget_productos.setItem(fila, 0, QTableWidgetItem(str(producto.codigo)))
             self.tableWidget_productos.setItem(fila, 1, QTableWidgetItem(producto.nombre))
             self.tableWidget_productos.setItem(fila, 2,
@@ -226,10 +339,15 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
             self.tableWidget_productos.setItem(fila, 3,
                                                QTableWidgetItem(
                                                    f"${producto.valor_venta:,.2f}" if producto.valor_venta else "N/A"))
+            # MOSTRAR GANANCIA NETA EN LUGAR DE BRUTA
             self.tableWidget_productos.setItem(fila, 4,
-                                               QTableWidgetItem(f"${ganancia:,.2f} ({porcentaje_ganancia:.1f}%)"))
+                                               QTableWidgetItem(
+                                                   f"${ganancia_neta:,.2f} ({porcentaje_ganancia_neta:.1f}%)"))
+            # ← AÑADIR COLUMNA DE CANTIDAD
             self.tableWidget_productos.setItem(fila, 5,
-                                               QTableWidgetItem(str(producto.codigo_categoria)))
+                                               QTableWidgetItem(str(producto.cantidad)))
+            self.tableWidget_productos.setItem(fila, 6,
+                                               QTableWidgetItem(nombre_categoria))
 
             # Guardar objeto completo
             self.tableWidget_productos.item(fila, 0).setData(Qt.UserRole, producto)
@@ -257,6 +375,7 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
         self.textEdit_descripcion.setPlainText(producto.descripcion or "")
         self.lineEdit_valor_adquisicion.setText(str(producto.valor_adquisicion))
         self.lineEdit_valor_venta.setText(str(producto.valor_venta) if producto.valor_venta else "")
+        self.spinBox_cantidad.setValue(producto.cantidad)  # ← ESTO YA ESTÁ BIEN
 
         # Establecer categoría
         for i in range(self.comboBox_categoria.count()):
@@ -273,6 +392,7 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
         self.textEdit_descripcion.clear()
         self.lineEdit_valor_adquisicion.clear()
         self.lineEdit_valor_venta.clear()
+        self.spinBox_cantidad.setValue(0)  # ← ESTO YA ESTÁ BIEN
         self.comboBox_categoria.setCurrentIndex(0)
         self.producto_seleccionado = None
         self.actualizar_resumen()
@@ -281,19 +401,26 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
         """Cambia el modo de operación de la ventana"""
         self.modo_actual = modo
 
+        # Si el usuario tiene solo lectura, no permitir edición
+        if self.es_solo_lectura and modo != "visualizacion":
+            QMessageBox.warning(
+                self,
+                "Permiso Denegado",
+                "Los usuarios esporádicos no tienen permisos para editar productos."
+            )
+            return
+
         if modo == "visualizacion":
-            self.label_modo.setText(
-                '<html><body><p align="center"><span style="font-weight:600;">Modo: Visualización</span></p></body></html>')
+            self.label_modo.setText('<html><body><p align="center"><span style="font-weight:600;">Modo: Visualización</span></p></body></html>')
             self.habilitar_formulario(False)
-            self.pushButton_editar.setEnabled(True)
-            self.pushButton_eliminar.setEnabled(True)
+            self.pushButton_editar.setEnabled(not self.es_solo_lectura)  # ← VERIFICAR PERMISOS
+            self.pushButton_eliminar.setEnabled(not self.es_solo_lectura)  # ← VERIFICAR PERMISOS
             self.pushButton_guardar.setEnabled(False)
             self.pushButton_cancelar.setEnabled(False)
             self.lineEdit_codigo.setEnabled(False)
 
         elif modo == "edicion":
-            self.label_modo.setText(
-                '<html><body><p align="center"><span style="font-weight:600; color:#FF8C00;">Modo: Editando</span></p></body></html>')
+            self.label_modo.setText('<html><body><p align="center"><span style="font-weight:600; color:#FF8C00;">Modo: Editando</span></p></body></html>')
             self.habilitar_formulario(True)
             self.pushButton_editar.setEnabled(False)
             self.pushButton_eliminar.setEnabled(False)
@@ -302,8 +429,7 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
             self.lineEdit_codigo.setEnabled(False)
 
         elif modo == "nuevo":
-            self.label_modo.setText(
-                '<html><body><p align="center"><span style="font-weight:600; color:#28A745;">Modo: Nuevo Producto</span></p></body></html>')
+            self.label_modo.setText('<html><body><p align="center"><span style="font-weight:600; color:#28A745;">Modo: Nuevo Producto</span></p></body></html>')
             self.habilitar_formulario(True)
             self.pushButton_editar.setEnabled(False)
             self.pushButton_eliminar.setEnabled(False)
@@ -318,6 +444,7 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
         self.lineEdit_valor_adquisicion.setEnabled(habilitar)
         self.lineEdit_valor_venta.setEnabled(habilitar)
         self.comboBox_categoria.setEnabled(habilitar)
+        self.spinBox_cantidad.setEnabled(habilitar)  # ← AÑADIR
         self.pushButton_calcular_venta.setEnabled(habilitar)
 
     def modo_nuevo_producto(self):
@@ -368,19 +495,26 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
                 QMessageBox.warning(self, "Error", "Debe seleccionar una categoría.")
                 return
 
-            # Fórmula: Precio Venta = (Valor Adq + Utilidad) * (1 + IVA/100)
-            utilidad = float(categoria.utilidad)
-            iva = float(categoria.iva)
+            # CORRECCIÓN: Los valores vienen de la base de datos así:
+            # IVA: 0.16, 0.19, 0.12 (decimales que representan 16%, 19%, 12%)
+            # Utilidad: 35.00, 39.00, 40.00 (porcentajes que representan 35%, 39%, 40%)
 
-            precio_con_utilidad = valor_adquisicion + utilidad
-            precio_venta = precio_con_utilidad * (1 + iva / 100)
+            iva_decimal = float(categoria.iva)  # Ej: 0.16 (16%)
+            utilidad_porcentaje = float(categoria.utilidad)  # Ej: 35.00 (35%)
+
+            # Convertir utilidad de porcentaje a valor monetario
+            utilidad_monetaria = valor_adquisicion * (utilidad_porcentaje / 100)
+
+            # Fórmula corregida: Precio Venta = (Valor Adq + Utilidad) * (1 + IVA)
+            precio_con_utilidad = valor_adquisicion + utilidad_monetaria
+            precio_venta = precio_con_utilidad * (1 + iva_decimal)
 
             # Establecer el precio calculado
             self.lineEdit_valor_venta.setText(f"{precio_venta:.2f}")
 
             self.statusBar().showMessage(
                 f"Precio calculado: ${precio_venta:,.2f} "
-                f"(IVA: {iva}%, Utilidad: ${utilidad:,.2f})"
+                f"(IVA: {iva_decimal * 100}%, Utilidad: {utilidad_porcentaje}%)"
             )
 
         except ValueError:
@@ -400,26 +534,41 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
             if self.lineEdit_valor_venta.text().strip():
                 valor_venta = float(self.lineEdit_valor_venta.text())
 
-            ganancia = valor_venta - valor_adq
-            porcentaje = (ganancia / valor_adq * 100) if valor_adq > 0 else 0
-
-            # Calcular IVA incluido
+            # Obtener categoría para el cálculo del IVA
             categoria = self.get_categoria_seleccionada()
-            iva_monto = 0
-            if categoria and valor_venta > 0:
-                iva_porcentaje = float(categoria.iva)
-                iva_monto = valor_venta * (iva_porcentaje / (100 + iva_porcentaje))
+            iva_decimal = 0
+            if categoria:
+                iva_decimal = float(categoria.iva)
 
-            # Actualizar labels
+            # CALCULAR GANANCIA REAL (considerando que el IVA se paga al estado)
+            # Ganancia bruta = Precio de venta - Costo de adquisición
+            ganancia_bruta = valor_venta - valor_adq
+
+            # IVA a pagar = (Precio de venta / (1 + IVA)) * IVA
+            # Esto representa el monto de IVA que debemos pagar al estado
+            base_imponible = valor_venta / (1 + iva_decimal) if iva_decimal > 0 else valor_venta
+            iva_a_pagar = base_imponible * iva_decimal
+
+            # Ganancia neta = Ganancia bruta - IVA a pagar
+            ganancia_neta = ganancia_bruta - iva_a_pagar
+
+            # Porcentajes
+            porcentaje_bruto = (ganancia_bruta / valor_adq * 100) if valor_adq > 0 else 0
+            porcentaje_neto = (ganancia_neta / valor_adq * 100) if valor_adq > 0 else 0
+
+            # Calcular IVA incluido en el precio
+            iva_monto = valor_venta * (iva_decimal / (1 + iva_decimal)) if iva_decimal > 0 else 0
+
+            # Actualizar labels - MOSTRAR GANANCIA NETA (la real)
             self.label_resumen_adquisicion.setText(f"📥 Costo de Adquisición: ${valor_adq:,.2f}")
             self.label_resumen_venta.setText(f"💰 Precio de Venta: ${valor_venta:,.2f}")
             self.label_resumen_ganancia.setText(
-                f"📈 Ganancia Estimada: ${ganancia:,.2f} ({porcentaje:.2f}%)"
+                f"📈 Ganancia Neta: ${ganancia_neta:,.2f} ({porcentaje_neto:.2f}%)"
             )
-            self.label_resumen_iva.setText(f"🧾 IVA Incluido: ${iva_monto:,.2f}")
+            self.label_resumen_iva.setText(f"🧾 IVA a Pagar: ${iva_a_pagar:,.2f}")
 
         except ValueError:
-            pass  # Ignorar si los valores no son válidos aún
+            pass
 
     def validar_formulario(self):
         """Valida que los campos obligatorios estén llenos"""
@@ -458,6 +607,7 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
             valor_venta_text = self.lineEdit_valor_venta.text().strip()
             valor_venta = float(valor_venta_text) if valor_venta_text else None
             codigo_categoria = self.comboBox_categoria.currentData()
+            cantidad = self.spinBox_cantidad.value()  # ← AÑADIR ESTA LÍNEA
 
             if self.modo_actual == "nuevo":
                 exito = self.producto_controller.crear(
@@ -466,7 +616,8 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
                     descripcion=descripcion,
                     valor_adquisicion=valor_adquisicion,
                     valor_venta=valor_venta,
-                    codigo_categoria=codigo_categoria
+                    codigo_categoria=codigo_categoria,
+                    cantidad=cantidad  # ← AÑADIR ESTE PARÁMETRO
                 )
 
                 if exito:
@@ -485,7 +636,8 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
                     descripcion=descripcion,
                     valor_adquisicion=valor_adquisicion,
                     valor_venta=valor_venta,
-                    codigo_categoria=codigo_categoria
+                    codigo_categoria=codigo_categoria,
+                    cantidad=cantidad  # ← AÑADIR ESTE PARÁMETRO
                 )
 
                 if exito:
@@ -546,6 +698,7 @@ class CRUDProductosWindow(QtWidgets.QMainWindow):
 
 
 if __name__ == "__main__":
+    sesion.set_usuario_id(1001)
     app = QtWidgets.QApplication(sys.argv)
     window = CRUDProductosWindow()
     window.show()

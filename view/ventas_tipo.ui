@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>VentanaVentasTipo</class>
+ <widget class="QWidget" name="VentanaVentasTipo">
+  <property name="windowTitle">
+   <string>Ventas por Tipo</string>
+  </property>
+
+  <layout class="QVBoxLayout" name="verticalLayout">
+
+   <item>
+    <widget class="QLabel" name="lbl_titulo">
+     <property name="text">
+      <string>Reporte de Ventas por Tipo</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="styleSheet">
+      <string>font-size:18px; font-weight:bold;</string>
+     </property>
+    </widget>
+   </item>
+
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+
+     <item row="0" column="0">
+      <widget class="QLabel" name="lbl_inicio">
+       <property name="text">
+        <string>Fecha Inicio (YYYY-MM-DD):</string>
+       </property>
+      </widget>
+     </item>
+
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="txt_inicio"/>
+     </item>
+
+     <item row="1" column="0">
+      <widget class="QLabel" name="lbl_fin">
+       <property name="text">
+        <string>Fecha Fin (YYYY-MM-DD):</string>
+       </property>
+      </widget>
+     </item>
+
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="txt_fin"/>
+     </item>
+
+    </layout>
+   </item>
+
+   <item>
+    <widget class="QTableWidget" name="tabla_resumen"/>
+   </item>
+
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+
+     <item>
+      <widget class="QPushButton" name="btn_buscar">
+       <property name="text">
+        <string>Buscar</string>
+       </property>
+      </widget>
+     </item>
+
+     <item>
+      <widget class="QPushButton" name="btn_pdf">
+       <property name="text">
+        <string>Generar PDF</string>
+       </property>
+      </widget>
+     </item>
+
+     <item>
+      <widget class="QPushButton" name="btn_cerrar">
+       <property name="text">
+        <string>Cerrar</string>
+       </property>
+      </widget>
+     </item>
+
+    </layout>
+   </item>
+
+  </layout>
+ </widget>
+</ui>

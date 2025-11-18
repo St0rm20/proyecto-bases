@@ -136,6 +136,22 @@ class Venta(BaseModel):
         })
         return [VentaData(*r) for r in resultados]
 
+    # En tu modelo venta.py, el método buscar_por_fecha debería verse así:
+    def buscar_por_fecha_(self, fecha_inicio: str, fecha_fin: str) -> List[VentaData]:
+        """Busca ventas en un rango de fechas usando TO_DATE para Oracle"""
+        sql = """
+              SELECT * \
+              FROM Venta
+              WHERE fecha BETWEEN TO_DATE(:fecha_inicio, 'YYYY-MM-DD')
+                        AND TO_DATE(:fecha_fin, 'YYYY-MM-DD')
+              ORDER BY fecha DESC \
+              """
+        resultados = self.db.execute_query(sql, {
+            'fecha_inicio': fecha_inicio,
+            'fecha_fin': fecha_fin
+        })
+        return [VentaData(*r) for r in resultados]
+
     def buscar_por_tipo(self, tipo_venta: str) -> List[VentaData]:
         """Busca ventas por tipo"""
         sql = "SELECT * FROM Venta WHERE tipo_venta = :tipo ORDER BY fecha DESC"
@@ -163,3 +179,17 @@ class Venta(BaseModel):
         sql = "SELECT codigo_producto FROM DetalleVentaProducto WHERE id_venta = :id"
         resultados = self.db.execute_query(sql, {'id': id_venta})
         return [r[0] for r in resultados]
+
+
+    def actualizar_estado_credito(self, id_venta: int, estado_credito: str) -> bool:
+        """Actualiza el estado del crédito de una venta"""
+        sql = "UPDATE Venta SET estado_credito = :estado WHERE id_venta = :id"
+        try:
+            filas = self.db.execute_query(sql, {
+                'estado': estado_credito,
+                'id': id_venta
+            }, fetch=False)
+            return filas > 0
+        except Exception as e:
+            print(f"Error al actualizar estado de crédito: {e}")
+            return False

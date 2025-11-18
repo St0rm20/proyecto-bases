@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1400</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Sistema de Ventas</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_main">
+    <item>
+     <widget class="QLabel" name="label_titulo">
+      <property name="text">
+       <string>&lt;html&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style="font-size:16pt; font-weight:600;"&gt;🛒 Nueva Venta&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_contenido">
+      <item>
+       <!-- Panel Izquierdo: Datos de Venta -->
+       <widget class="QGroupBox" name="groupBox_datos_venta">
+        <property name="title">
+         <string>Datos de la Venta</string>
+        </property>
+        <property name="minimumWidth">
+         <number>500</number>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_izquierda">
+         <item>
+          <widget class="QGroupBox" name="groupBox_cliente">
+           <property name="title">
+            <string>Cliente</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_cliente">
+            <item>
+             <widget class="QLabel" name="label_seleccionar_cliente">
+              <property name="text">
+               <string>Seleccione el cliente:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="comboBox_cliente">
+              <item>
+               <property name="text">
+                <string>-- Seleccione un cliente --</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_info_cliente">
+              <property name="text">
+               <string>Información del cliente aparecerá aquí</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_productos">
+           <property name="title">
+            <string>Agregar Productos</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_productos">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_producto">
+              <property name="text">
+               <string>Producto:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" colspan="2">
+             <widget class="QComboBox" name="comboBox_producto">
+              <item>
+               <property name="text">
+                <string>-- Seleccione un producto --</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_stock_disponible">
+              <property name="text">
+               <string>Stock Disponible:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" colspan="2">
+             <widget class="QLabel" name="label_cantidad_disponible">
+              <property name="text">
+               <string>&lt;html&gt;&lt;body&gt;&lt;p&gt;&lt;span style="font-weight:600; color:#0066CC;"&gt;0 unidades&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_precio_unitario">
+              <property name="text">
+               <string>Precio Unitario:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" colspan="2">
+             <widget class="QLabel" name="label_precio_producto">
+              <property name="text">
+               <string>&lt;html&gt;&lt;body&gt;&lt;p&gt;&lt;span style="font-weight:600; color:#009900;"&gt;$0.00&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_cantidad_solicitar">
+              <property name="text">
+               <string>Cantidad a Comprar:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QSpinBox" name="spinBox_cantidad">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>9999</number>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="2">
+             <widget class="QPushButton" name="pushButton_agregar_producto">
+              <property name="text">
+               <string>➕ Agregar</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_tipo_pago">
+           <property name="title">
+            <string>Tipo de Pago</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_tipo_pago">
+            <item>
+             <widget class="QRadioButton" name="radioButton_contado">
+              <property name="text">
+               <string>💵 Pago de Contado</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="radioButton_credito">
+              <property name="text">
+               <string>💳 Pago a Crédito</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QWidget" name="widget_opciones_credito" native="true">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_credito">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_plazo">
+                 <property name="text">
+                  <string>Plazo de Cuotas:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="comboBox_plazo">
+                 <item>
+                  <property name="text">
+                   <string>12 meses</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>18 meses</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>24 meses</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item row="1" column="0" colspan="2">
+                <widget class="QLabel" name="label_info_credito">
+                 <property name="text">
+                  <string>&lt;html&gt;&lt;body&gt;&lt;p&gt;&lt;span style="font-size:9pt; font-style:italic;"&gt;• Cuota inicial: 30% del total&lt;br/&gt;• Saldo restante (70%) + 5% interés&lt;br/&gt;• Solo 1 crédito activo por cliente&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="wordWrap">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <!-- Panel Derecho: Carrito y Resumen -->
+       <widget class="QGroupBox" name="groupBox_carrito">
+        <property name="title">
+         <string>Carrito de Compras</string>
+        </property>
+        <property name="minimumWidth">
+         <number>600</number>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_derecha">
+         <item>
+          <widget class="QTableWidget" name="tableWidget_carrito">
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::SingleSelection</enum>
+           </property>
+           <column>
+            <property name="text">
+             <string>Código</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Producto</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Cantidad</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Precio Unit.</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Subtotal</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_botones_carrito">
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_editar_item">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>✏️ Editar Cantidad</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_eliminar_item">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>🗑️ Eliminar</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_resumen">
+           <property name="title">
+            <string>Resumen de Venta</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_resumen">
+            <item>
+             <widget class="QLabel" name="label_subtotal">
+              <property name="text">
+               <string>Subtotal: $0.00</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_iva">
+              <property name="text">
+               <string>IVA: $0.00</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_total">
+              <property name="text">
+               <string>&lt;html&gt;&lt;body&gt;&lt;p&gt;&lt;span style="font-size:14pt; font-weight:600;"&gt;TOTAL: $0.00&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="Line" name="line">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QWidget" name="widget_resumen_credito" native="true">
+              <property name="visible">
+               <bool>false</bool>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_resumen_credito">
+               <item>
+                <widget class="QLabel" name="label_cuota_inicial">
+                 <property name="text">
+                  <string>💰 Cuota Inicial (30%): $0.00</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_saldo_financiar">
+                 <property name="text">
+                  <string>📊 Saldo a Financiar (70%): $0.00</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_interes">
+                 <property name="text">
+                  <string>📈 Interés (5%): $0.00</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_total_financiado">
+                 <property name="text">
+                  <string>&lt;html&gt;&lt;body&gt;&lt;p&gt;&lt;span style="font-weight:600;"&gt;Total Financiado: $0.00&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_cuota_mensual">
+                 <property name="text">
+                  <string>&lt;html&gt;&lt;body&gt;&lt;p&gt;&lt;span style="font-size:11pt; font-weight:600; color:#0066CC;"&gt;💳 Cuota Mensual: $0.00&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_botones_finales">
+           <item>
+            <widget class="QPushButton" name="pushButton_limpiar">
+             <property name="minimumHeight">
+              <number>40</number>
+             </property>
+             <property name="text">
+              <string>🗑️ Limpiar Todo</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_finalizar">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="minimumHeight">
+              <number>40</number>
+             </property>
+             <property name="text">
+              <string>✅ Finalizar Venta</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>700</height>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,80 +18,66 @@
     <item>
      <widget class="QLabel" name="label_titulo">
       <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style=" font-size:14pt; font-weight:600;"&gt;Registro de Cliente&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style=" font-size:14pt; font-weight:600;"&gt;Registro de Usuario&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QGroupBox" name="groupBox_datos_basicos">
       <property name="title">
-       <string>Datos Básicos</string>
+       <string>Datos de Usuario</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_basicos">
        <item row="0" column="0">
-        <widget class="QLabel" name="label_codigo">
+        <widget class="QLabel" name="label_id_usuario">
          <property name="text">
-          <string>Código (Cédula) *:</string>
+          <string>ID de Usuario *:</string>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="lineEdit_codigo">
+        <widget class="QLineEdit" name="lineEdit_id_usuario">
          <property name="placeholderText">
-          <string>Ej: 1234567890</string>
+          <string>Ej: 1001</string>
          </property>
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_nombre">
+        <widget class="QLabel" name="label_nombre_usuario">
          <property name="text">
-          <string>Nombre Completo *:</string>
+          <string>Nombre de Usuario *:</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="lineEdit_nombre">
+        <widget class="QLineEdit" name="lineEdit_nombre_usuario">
          <property name="placeholderText">
-          <string>Ej: Juan Pérez García</string>
+          <string>Ej: juan.perez</string>
          </property>
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="label_telefono">
-         <property name="text">
-          <string>Teléfono:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="lineEdit_telefono">
-         <property name="placeholderText">
-          <string>Ej: 3001234567</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
         <widget class="QLabel" name="label_email">
          <property name="text">
           <string>Email *:</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
+       <item row="2" column="1">
         <widget class="QLineEdit" name="lineEdit_email">
          <property name="placeholderText">
           <string>Ej: usuario@email.com</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
+       <item row="3" column="0">
         <widget class="QLabel" name="label_rol">
          <property name="text">
           <string>Tipo de Usuario *:</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="1">
+       <item row="3" column="1">
         <widget class="QComboBox" name="comboBox_rol">
          <item>
           <property name="text">
@@ -100,79 +86,19 @@
          </item>
          <item>
           <property name="text">
-           <string>Usuario Paramétrico</string>
+           <string>Administrador</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Usuario Esporádico</string>
+           <string>Usuario Regular</string>
           </property>
          </item>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="groupBox_direccion">
-      <property name="title">
-       <string>Dirección (Opcional)</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_direccion">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_departamento">
-         <property name="text">
-          <string>Departamento:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="lineEdit_departamento">
-         <property name="placeholderText">
-          <string>Ej: Quindío</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_municipio">
-         <property name="text">
-          <string>Municipio:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="lineEdit_municipio">
-         <property name="placeholderText">
-          <string>Ej: Armenia</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_calle">
-         <property name="text">
-          <string>Calle:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="lineEdit_calle">
-         <property name="placeholderText">
-          <string>Ej: Calle 15</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_direccion">
-         <property name="text">
-          <string>Dirección Completa:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QLineEdit" name="lineEdit_direccion">
-         <property name="placeholderText">
-          <string>Ej: Calle 15 # 20-30, Apto 301</string>
-         </property>
+         <item>
+          <property name="text">
+           <string>Usuario Invitado</string>
+          </property>
+         </item>
         </widget>
        </item>
       </layout>
@@ -236,7 +162,7 @@
       <property name="sizeHint" stdset="0">
        <size>
         <width>20</width>
-        <height>20</height>
+        <height>40</height>
        </size>
       </property>
      </spacer>

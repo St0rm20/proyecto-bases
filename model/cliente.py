@@ -11,28 +11,9 @@ from dataclasses import dataclass
 from typing import Optional, List
 
 
-# Importaciones para manejo seguro de contraseñas
-"""
-Werkzeug es una biblioteca de utilidades para aplicaciones web en Python.
-Dentro de sus muchas funcionalidades, incluye herramientas para manejar
-la seguridad de las contraseñas, como el hashing y la verificación."""
-from werkzeug.security import generate_password_hash, check_password_hash
-
-
-
-"""
-La anotación @dataclass se utiliza para simplificar la creación de clases
-que principalmente almacenan datos. Proporciona automáticamente métodos
-como __init__(), __repr__(), __eq__(), entre otros, basados en los
-atributos definidos en la clase.
-
-init = constructor
-repr = toString
-eq = equals
-"""
 @dataclass
 class ClienteData:
-    """Representa un cliente"""
+    """Representa un cliente (solo datos de contacto)"""
     codigo_cliente: int
     nombre: str
     telefono: Optional[str] = None
@@ -40,16 +21,12 @@ class ClienteData:
     municipio: Optional[str] = None
     calle: Optional[str] = None
     direccion: Optional[str] = None
-    email: Optional[str] = None
-    contrasena: Optional[str] = None
-    id_rol: Optional[int] = None
 
     def __str__(self):
-        return f"Cliente(codigo={self.codigo_cliente}, nombre='{self.nombre}', email='{self.email}')"
+        return f"Cliente(codigo={self.codigo_cliente}, nombre='{self.nombre}')"
 
     def __repr__(self):
-        # ¡Importante! Nunca mostrar la contraseña en los logs o repr
-        return f"ClienteData(codigo_cliente={self.codigo_cliente!r}, nombre={self.nombre!r}, email={self.email!r}, ...)"
+        return f"ClienteData(codigo_cliente={self.codigo_cliente!r}, nombre={self.nombre!r})"
 
 
 class Cliente(BaseModel):
@@ -63,22 +40,14 @@ class Cliente(BaseModel):
 
     def crear(self, codigo_cliente: int, nombre: str, telefono: str = None,
               departamento: str = None, municipio: str = None, calle: str = None,
-              direccion: str = None, email: str = None, contrasena: str = None,
-              id_rol: int = None) -> bool:
+              direccion: str = None) -> bool:
         """Crea un nuevo cliente"""
-
-        # --- MODIFICADO: HASHING DE CONTRASEÑA ---
-        hash_contrasena = None
-        if contrasena:
-            # Genera un hash seguro para la contraseña
-            hash_contrasena = generate_password_hash(contrasena)
-        # --------------------------------------------
 
         sql = """
             INSERT INTO Cliente (codigo_cliente, nombre, telefono, departamento, 
-                                municipio, calle, direccion, email, contrasena, id_rol)
+                                municipio, calle, direccion)
             VALUES (:codigo_cliente, :nombre, :telefono, :departamento, 
-                    :municipio, :calle, :direccion, :email, :contrasena, :id_rol)
+                    :municipio, :calle, :direccion)
         """
         try:
             self.db.execute_query(sql, {
@@ -88,10 +57,7 @@ class Cliente(BaseModel):
                 'departamento': departamento,
                 'municipio': municipio,
                 'calle': calle,
-                'direccion': direccion,
-                'email': email,
-                'contrasena': hash_contrasena,
-                'id_rol': id_rol
+                'direccion': direccion
             }, fetch=False)
             return True
         except Exception as e:
@@ -100,8 +66,7 @@ class Cliente(BaseModel):
 
     def actualizar(self, codigo_cliente: int, nombre: str = None, telefono: str = None,
                    departamento: str = None, municipio: str = None, calle: str = None,
-                   direccion: str = None, email: str = None, contrasena: str = None,
-                   id_rol: int = None) -> bool:
+                   direccion: str = None) -> bool:
         """Actualiza un cliente existente (solo los campos proporcionados)"""
         campos = []
         params = {'codigo_cliente': codigo_cliente}
@@ -124,20 +89,6 @@ class Cliente(BaseModel):
         if direccion is not None:
             campos.append("direccion = :direccion")
             params['direccion'] = direccion
-        if email is not None:
-            campos.append("email = :email")
-            params['email'] = email
-
-        # --- BLOQUE AÑADIDO: ACTUALIZAR CONTRASEÑA ---
-        if contrasena is not None:
-            # Si se provee una nueva contraseña, generar un nuevo hash
-            campos.append("contrasena = :contrasena")
-            params['contrasena'] = generate_password_hash(contrasena)
-        # ----------------------------------------------
-
-        if id_rol is not None:
-            campos.append("id_rol = :id_rol")
-            params['id_rol'] = id_rol
 
         if not campos:
             return False
@@ -154,7 +105,6 @@ class Cliente(BaseModel):
     def obtener_todos_como_objetos(self) -> List[ClienteData]:
         """Obtiene todos los clientes como objetos"""
         resultados = self.obtener_todos()
-        # El *r expandirá todos los campos de la BD, incluyendo 'contrasena'
         return [ClienteData(*r) for r in resultados]
 
     def buscar_por_nombre(self, nombre: str) -> List[ClienteData]:
@@ -169,28 +119,17 @@ class Cliente(BaseModel):
         resultados = self.db.execute_query(sql, {'municipio': municipio})
         return [ClienteData(*r) for r in resultados]
 
-    def buscar_por_email(self, email: str) -> Optional[ClienteData]:
-        """Busca un cliente por email"""
-        sql = "SELECT * FROM Cliente WHERE UPPER(email) = UPPER(:email)"
-        resultado = self.db.execute_query(sql, {'email': email})
-        return ClienteData(*resultado[0]) if resultado else None
+    def eliminar(self, id_valor):
+        """Elimina un cliente por su código"""
+        sql = "DELETE FROM Cliente WHERE codigo_cliente = :id_valor"
+        try:
+            filas = self.db.execute_query(sql, {'id_valor': id_valor}, fetch=False)
+            return filas > 0
+        except Exception as e:
+            print(f"Error al eliminar cliente: {e}")
+            return False
 
-    # --- MÉTODO ESENCIAL AÑADIDO PARA LOGIN ---
-    def verificar_contrasena(self, email: str, contrasena_ingresada: str) -> bool:
-        """
-        Verifica si la contraseña ingresada por el usuario coincide con el
-        hash almacenado en la base de datos.
-        """
-        # 1. Buscar al cliente por su email
-        cliente = self.buscar_por_email(email)
-
-        if not cliente:
-            return False # Usuario no existe
-
-        if not cliente.contrasena:
-            return False # Usuario no tiene una contraseña registrada
-
-        # 2. Comparar la contraseña ingresada con el hash de la BD
-        #    check_password_hash se encarga de todo el proceso de forma segura.
-        return check_password_hash(cliente.contrasena, contrasena_ingresada)
-    # -------------------------------------------
+    def obtener_por_codigo(self, codigo_cliente: int) -> ClienteData:
+        """Obtiene un cliente por su código"""
+        resultado = self.obtener_por_id(codigo_cliente)
+        return ClienteData(*resultado) if resultado else None
