@@ -2,98 +2,102 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from textwrap import dedent
 from database.connection import get_connection
-# <--- IMPORTANTE    # <--- IMPORTANTE
 from report.pdf_utils import crear_pdf
 def generar_factura_pdf(venta_id):
+    """
+    Genera una factura en PDF para una venta específica usando crear_pdf()
+    """
     print("Factura solicitada para venta:", venta_id)
 
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Consulta CORREGIDA con nombres exactos de tablas y columnas
-    sql = dedent("""
+    # Consulta para obtener datos generales de la venta
+    sql_venta = dedent("""
         SELECT 
             v.codigo_venta,
             v.fecha,
             c.nombre AS cliente,
-            p.nombre AS producto,
-            dp.cantidad,
-            p.valor_venta,
-            (dp.cantidad * p.valor_venta) AS subtotal,  -- CALCULAR subtotal
+            c.telefono,
+            c.direccion,
             v.total_bruto,
             v.iva_total,
             v.total_neto
         FROM VENTA v
-        JOIN CLIENTE c ON v.codigo_cliente = c.codigo_cliente        -- CORREGIDO
-        JOIN DETALLEVENTAPRODUCTO dp ON dp.id_venta = v.id_venta     -- CORREGIDO
-        JOIN PRODUCTO p ON p.codigo = dp.codigo_producto             -- CORREGIDO
+        JOIN CLIENTE c ON v.codigo_cliente = c.codigo_cliente
         WHERE v.codigo_venta = :venta
     """)
 
-    cursor.execute(sql, {"venta": venta_id})
-    filas = cursor.fetchall()
+    cursor.execute(sql_venta, {"venta": venta_id})
+    datos_venta = cursor.fetchone()
 
-    if not filas:
+    if not datos_venta:
         raise Exception(f"No existe la venta con código {venta_id}")
 
+    # Consulta para obtener los productos de la venta
+    sql_productos = dedent("""
+        SELECT 
+            p.nombre AS producto,
+            dp.cantidad,
+            p.valor_venta,
+            (dp.cantidad * p.valor_venta) AS subtotal
+        FROM DETALLEVENTAPRODUCTO dp
+        JOIN PRODUCTO p ON p.codigo = dp.codigo_producto
+        JOIN VENTA v ON dp.id_venta = v.id_venta
+        WHERE v.codigo_venta = :venta
+        ORDER BY p.nombre
+    """)
+
+    cursor.execute(sql_productos, {"venta": venta_id})
+    productos = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    # Desempaquetar datos de la venta
+    codigo_venta, fecha, cliente, telefono, direccion, total_bruto, iva_total, total_neto = datos_venta
+
+    # Preparar datos para el PDF
     nombre_pdf = f"factura_{venta_id}.pdf"
-    c = canvas.Canvas(nombre_pdf, pagesize=letter)
+    titulo = "FACTURA DE VENTA"
 
-    # ENCABEZADO
-    c.setFont("Helvetica-Bold", 16)
-    c.drawString(200, 750, "FACTURA DE VENTA")
+    # Encabezado con información de la venta
+    info_venta = [
+        ("Factura N°:", codigo_venta),
+        ("Fecha:", fecha.strftime('%d/%m/%Y')),
+        ("Cliente:", cliente),
+        ("Teléfono:", telefono or "No registrado"),
+        ("Dirección:", direccion or "No registrada"),
+    ]
 
-    # DATOS BÁSICOS
-    c.setFont("Helvetica", 12)
-    y = 710
+    # Headers de la tabla de productos
+    headers = ["Producto", "Cantidad", "Precio Unit.", "Subtotal"]
 
-    codigo_venta, fecha, cliente, _, _, _, _, total_bruto, iva_total, total_neto = filas[0]
+    # Formatear productos para la tabla
+    filas_productos = []
+    for producto, cantidad, precio, subtotal in productos:
+        filas_productos.append([
+            producto[:40],  # Limitar nombre del producto
+            str(cantidad),
+            f"${precio:,.2f}",
+            f"${subtotal:,.2f}"
+        ])
 
-    c.drawString(50, y, f"Factura N°: {codigo_venta}")
-    y -= 20
-    c.drawString(50, y, f"Fecha: {fecha.strftime('%d/%m/%Y')}")  # Formatear fecha
-    y -= 20
-    c.drawString(50, y, f"Cliente: {cliente}")
-    y -= 40
+    # Agregar fila de totales
+    filas_productos.append(["", "", "", ""])  # Fila vacía para separar
+    filas_productos.append(["", "", "Subtotal:", f"${total_bruto:,.2f}"])
+    filas_productos.append(["", "", "IVA:", f"${iva_total:,.2f}"])
+    filas_productos.append(["", "", "TOTAL:", f"${total_neto:,.2f}"])
 
-    # Detalles de productos
-    c.setFont("Helvetica-Bold", 12)
-    c.drawString(50, y, "Producto")
-    c.drawString(250, y, "Cantidad")
-    c.drawString(330, y, "Precio Unit.")
-    c.drawString(410, y, "Subtotal")
-    y -= 20
-    c.line(50, y, 550, y)
-    y -= 20
+    # Crear el PDF usando la función crear_pdf
+    crear_pdf(
+        nombre_pdf,
+        titulo,
+        headers,
+        filas_productos  # Pasar información de la venta como info adicional
+    )
 
-    c.setFont("Helvetica", 12)
-
-    for fila in filas:
-        _, _, _, producto, cantidad, precio, subtotal, _, _, _ = fila
-
-        c.drawString(50, y, producto[:30])  # Limitar longitud del nombre
-        c.drawString(250, y, str(cantidad))
-        c.drawString(330, y, f"${precio:,.2f}")
-        c.drawString(410, y, f"${subtotal:,.2f}")
-        y -= 20
-
-        # Salto de página si es necesario
-        if y < 100:
-            c.showPage()
-            y = 750
-            c.setFont("Helvetica", 12)
-
-    # Totales
-    y -= 30
-    c.setFont("Helvetica-Bold", 12)
-    c.drawString(350, y, f"Bruto: ${total_bruto:,.2f}")
-    y -= 20
-    c.drawString(350, y, f"IVA: ${iva_total:,.2f}")
-    y -= 20
-    c.drawString(350, y, f"Total: ${total_neto:,.2f}")
-
-    c.save()
-    print(f"Factura generada con éxito: {nombre_pdf}")
+    print(f"✅ Factura generada con éxito: {nombre_pdf}")
     return nombre_pdf
 
 def reporte_total_ventas_mes(anio, mes):

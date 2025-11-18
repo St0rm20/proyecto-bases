@@ -8,7 +8,7 @@ class VentanaIVA(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        uic.loadUi("iva.ui", self)
+        uic.loadUi("ventana_iva.ui", self)
 
         # Llenar combos
         self.cargar_anios()
